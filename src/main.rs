@@ -6,11 +6,10 @@ fn main() {
         // Prompt
         print!("$ ");
         io::stdout().flush().unwrap();
-
-        // Capture the user's command in the "command" variable
         let mut command = String::new();
+        // Capture the user's command in the "command" variable
         io::stdin().read_line(&mut command).unwrap();
-
+        if command.trim() == "exit" { break; }
         println!("{}: command not found", command.trim())
     }
 }
