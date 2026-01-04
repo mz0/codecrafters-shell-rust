@@ -2,13 +2,15 @@
 use std::io::{self, Write};
 
 fn main() {
-    // Prompt
-    print!("$ ");
-    io::stdout().flush().unwrap();
+    loop {
+        // Prompt
+        print!("$ ");
+        io::stdout().flush().unwrap();
 
-    // Capture the user's command in the "command" variable
-    let mut command = String::new();
-    io::stdin().read_line(&mut command).unwrap();
+        // Capture the user's command in the "command" variable
+        let mut command = String::new();
+        io::stdin().read_line(&mut command).unwrap();
 
-    println!("{}: command not found", command.trim())
+        println!("{}: command not found", command.trim())
+    }
 }
