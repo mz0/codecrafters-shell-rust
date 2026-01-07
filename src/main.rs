@@ -10,10 +10,10 @@ fn main() {
         // Prompt
         print!("$ ");
         io::stdout().flush().unwrap();
-        let mut command = String::new();
-        // Capture the user's command in the "command" variable
-        io::stdin().read_line(&mut command).unwrap();
-        let cmd: &str = command.trim();
+        let mut raw_input = String::new();
+        // Capture the user's command
+        io::stdin().read_line(&mut raw_input).unwrap();
+        let cmd: &str = raw_input.trim();
         if cmd == cmd_exit { break }
         if cmd == cmd_echo {
             echo("");
