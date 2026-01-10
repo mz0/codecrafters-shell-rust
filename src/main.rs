@@ -1,5 +1,8 @@
 #[allow(unused_imports)]
 use std::io::{self, Write};
+use std::env;
+use std::path::{Path, PathBuf};
+use std::fs;
 
 fn main() {
     let cmd_echo = "echo";
@@ -12,7 +15,7 @@ fn main() {
         io::stdout().flush().unwrap();
         let mut raw_input = String::new();
 
-        // Capture the user's cinput
+        // Capture the user's input
         io::stdin().read_line(&mut raw_input).unwrap();
         let cmd: &str = raw_input.trim();
 
@@ -33,12 +36,51 @@ fn main() {
 
 fn type_of(s: &str, builtins: &[&str]) {
     if builtins.contains(&s) {
-        println!("{} is a shell builtin", s)
-    } else {
-        println!("{}: not found", s)
+        println!("{} is a shell builtin", s);
+        return
+    }
+    match find_executable_in_path(s) {
+        Some(path) => println!("{} is {}", s, path.display()),
+        None => println!("{}: not found", s),
     }
 }
 
 fn echo(s: &str) {
     println!("{}", s);
+}
+
+fn find_executable_in_path(name: &str) -> Option<PathBuf> {
+    let path_var = env::var_os("PATH")?;
+    let paths = env::split_paths(&path_var);
+
+    for dir in paths {
+        // Empty PATH entries mean current directory
+        let dir = if dir.as_os_str().is_empty() {
+            Path::new(".").to_path_buf()
+        } else {
+            dir
+        };
+
+        let candidate = dir.join(name);
+
+        if is_executable(&candidate) {
+            return Some(candidate);
+        }
+    }
+
+    None
+}
+
+fn is_executable(path: &Path) -> bool {
+    let metadata = match fs::metadata(path) {
+        Ok(m) => m,
+        Err(_) => return false,
+    };
+
+    if !metadata.is_file() {
+        return false;
+    }
+
+    use std::os::unix::fs::PermissionsExt;
+    metadata.permissions().mode() & 0o111 != 0
 }
