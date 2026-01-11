@@ -29,7 +29,7 @@ fn main() {
             type_of(remainder, &builtins)
         } else if let Some(exec_path) = find_executable_in_path(first_word) {
             let argv = tokenize(remainder);
-            _ = run_external(exec_path, first_word, &argv);
+            _ = run_external_unix(exec_path, first_word, &argv);
         } else {
             println!("{}: command not found", cmd)
         }
@@ -43,7 +43,7 @@ fn tokenize(input: &str) -> Vec<String> {
         .collect()
 }
 
-fn run_external(path: PathBuf, name: &str, args: &[String]) -> io::Result<i32> {
+fn run_external_unix(path: PathBuf, name: &str, args: &[String]) -> io::Result<i32> {
     use std::os::unix::process::CommandExt;
     let status = std::process::Command::new(path)
         .arg0(name)
