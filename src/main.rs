@@ -114,12 +114,8 @@ fn pwd() {
 }
 
 fn cd(path: &str) {
-    let new_workdir = Path::new(path);
-    if !new_workdir.is_absolute() {
-        println!("cd: {}: No such file or directory", path);
-        return
-    }
-    if env::set_current_dir(&new_workdir).is_err() {
+    if path.is_empty() { return }
+    if env::set_current_dir(&Path::new(path)).is_err() {
         println!("cd: {}: No such file or directory", path);
     }
 }
