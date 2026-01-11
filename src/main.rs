@@ -2,7 +2,6 @@
 use std::io::{self, Write};
 use std::env;
 use std::path::{Path, PathBuf};
-use std::fs;
 
 fn main() {
     let cmd_echo = "echo";
@@ -72,21 +71,11 @@ fn find_executable_in_path(name: &str) -> Option<PathBuf> {
 }
 
 fn is_executable(path: &Path) -> bool {
-    use std::os::unix::fs::PermissionsExt;
-
-    let meta = match fs::symlink_metadata(path) {
+    let metadata = match std::fs::metadata(path) {
         Ok(m) => m,
         Err(_) => return false,
     };
 
-    if meta.file_type().is_symlink() {
-        let target = match fs::metadata(path) {
-            Ok(m) => m,
-            Err(_) => return false,
-        };
-
-        return target.is_file() && (target.permissions().mode() & 0o111 != 0);
-    }
-
-    meta.is_file() && (meta.permissions().mode() & 0o111 != 0)
+    use std::os::unix::fs::PermissionsExt;
+    metadata.is_file() && (metadata.permissions().mode() & 0o111 != 0)
 }
