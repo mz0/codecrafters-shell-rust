@@ -27,10 +27,27 @@ fn main() {
             echo(remainder)
         } else if first_word == cmd_type {
             type_of(remainder, &builtins)
+        } else if let Some(exec_path) = find_executable_in_path(first_word) {
+            let argv = tokenize(remainder);
+            run_external(exec_path, &argv);
         } else {
             println!("{}: command not found", cmd)
         }
     }
+}
+// extra simple tokenizer for now
+fn tokenize(input: &str) -> Vec<String> {
+    input
+        .split_whitespace()
+        .map(str::to_owned)
+        .collect()
+}
+
+fn run_external(path: PathBuf, args: &[String]) {
+    std::process::Command::new(path)
+        .args(args)
+        .status()
+        .expect("failed to execute command");
 }
 
 fn type_of(s: &str, builtins: &[&str]) {
