@@ -113,9 +113,14 @@ fn pwd() {
     println!("{}", cwd.display());
 }
 
-fn cd(path: &str) {
-    if path.is_empty() { return }
-    if env::set_current_dir(&Path::new(path)).is_err() {
+fn cd(cd_path: &str) {
+    if cd_path.is_empty() { return }
+    let path: String = if cd_path == "~" {
+        env::var_os("HOME").unwrap_or_else(|| ".".into()).to_string_lossy().into_owned()
+    } else {
+        String::from(cd_path)
+    };
+    if env::set_current_dir(&Path::new(&path)).is_err() {
         println!("cd: {}: No such file or directory", path);
     }
 }
