@@ -6,8 +6,9 @@ use std::path::{Path, PathBuf};
 fn main() {
     let cmd_echo = "echo";
     let cmd_exit = "exit";
+    let cmd_pwd = "pwd";
     let cmd_type = "type";
-    let builtins = vec![cmd_echo, cmd_exit, cmd_type];
+    let builtins = vec![cmd_echo, cmd_exit, cmd_pwd, cmd_type];
     loop {
         // Prompt
         print!("$ ");
@@ -25,6 +26,8 @@ fn main() {
 
         if first_word == cmd_echo {
             echo(remainder)
+        } else if first_word == cmd_pwd {
+            pwd()
         } else if first_word == cmd_type {
             type_of(remainder, &builtins)
         } else if let Some(exec_path) = find_executable_in_path(first_word) {
@@ -35,6 +38,7 @@ fn main() {
         }
     }
 }
+
 // extra simple tokenizer for now
 fn tokenize(input: &str) -> Vec<String> {
     input
@@ -58,6 +62,7 @@ fn type_of(s: &str, builtins: &[&str]) {
         println!("{} is a shell builtin", s);
         return
     }
+
     match find_executable_in_path(s) {
         Some(path) => println!("{} is {}", s, path.display()),
         None => println!("{}: not found", s),
@@ -98,4 +103,9 @@ fn is_executable(path: &Path) -> bool {
 
     use std::os::unix::fs::PermissionsExt;
     metadata.is_file() && (metadata.permissions().mode() & 0o111 != 0)
+}
+
+fn pwd() {
+    let cwd = env::current_dir().unwrap();
+    println!("{}", cwd.display());
 }
