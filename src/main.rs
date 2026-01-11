@@ -4,11 +4,12 @@ use std::env;
 use std::path::{Path, PathBuf};
 
 fn main() {
+    let cmd_cd = "cd";
     let cmd_echo = "echo";
     let cmd_exit = "exit";
     let cmd_pwd = "pwd";
     let cmd_type = "type";
-    let builtins = vec![cmd_echo, cmd_exit, cmd_pwd, cmd_type];
+    let builtins = vec![cmd_cd, cmd_echo, cmd_exit, cmd_pwd, cmd_type];
     loop {
         // Prompt
         print!("$ ");
@@ -26,6 +27,8 @@ fn main() {
 
         if first_word == cmd_echo {
             echo(remainder)
+        } else if first_word == cmd_cd {
+            cd(remainder)
         } else if first_word == cmd_pwd {
             pwd()
         } else if first_word == cmd_type {
@@ -108,4 +111,15 @@ fn is_executable(path: &Path) -> bool {
 fn pwd() {
     let cwd = env::current_dir().unwrap();
     println!("{}", cwd.display());
+}
+
+fn cd(path: &str) {
+    let new_workdir = Path::new(path);
+    if !new_workdir.is_absolute() {
+        println!("cd: {}: No such file or directory", path);
+        return
+    }
+    if env::set_current_dir(&new_workdir).is_err() {
+        println!("cd: {}: No such file or directory", path);
+    }
 }
