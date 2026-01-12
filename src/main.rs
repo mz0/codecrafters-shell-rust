@@ -3,41 +3,50 @@ use std::io::{self, Write};
 use std::env;
 use std::path::{Path, PathBuf};
 
+pub const CMD_CD: &str = "cd";
+pub const CMD_ECHO: &str = "echo";
+pub const CMD_EXIT: &str = "exit";
+pub const CMD_PWD: &str = "pwd";
+pub const CMD_TYPE: &str = "type";
+
+mod rline;
+use rline::ShellHelper;
+
 fn main() {
-    let cmd_cd = "cd";
-    let cmd_echo = "echo";
-    let cmd_exit = "exit";
-    let cmd_pwd = "pwd";
-    let cmd_type = "type";
-    let builtins = vec![cmd_cd, cmd_echo, cmd_exit, cmd_pwd, cmd_type];
+    let builtins = vec![CMD_CD, CMD_ECHO, CMD_EXIT, CMD_PWD, CMD_TYPE];
+    let h = ShellHelper { builtins: builtins.clone() };
+    let mut rl = rustyline::Editor::<ShellHelper, _>::new().unwrap();
+    rl.set_helper(Some(h));
+
     loop {
         // Prompt
-        print!("$ ");
-        io::stdout().flush().unwrap();
-        let mut raw_input = String::new();
+        match rl.readline("$ ") {
+            Ok(line) => {
+                let cmd = line.trim();
+                if cmd.is_empty() { continue; }
 
-        // Capture the user's input
-        io::stdin().read_line(&mut raw_input).unwrap();
-        let cmd: &str = raw_input.trim();
+                _ = rl.add_history_entry(cmd);
+                if cmd == CMD_EXIT { break }
 
-        if cmd == cmd_exit { break }
+                let (first_word, remainder) = cmd.split_once(char::is_whitespace)
+                    .unwrap_or((cmd, ""));
 
-        let (first_word, remainder) = cmd.split_once(char::is_whitespace)
-            .unwrap_or((cmd, ""));
-
-        if first_word == cmd_echo {
-            echo(remainder)
-        } else if first_word == cmd_cd {
-            cd(remainder)
-        } else if first_word == cmd_pwd {
-            pwd()
-        } else if first_word == cmd_type {
-            type_of(remainder, &builtins)
-        } else if let Some(exec_path) = find_executable_in_path(first_word) {
-            let argv = tokenize(remainder);
-            _ = run_external_unix(exec_path, first_word, &argv);
-        } else {
-            println!("{}: command not found", cmd)
+                if first_word == CMD_ECHO {
+                    echo(remainder)
+                } else if first_word == CMD_CD {
+                    cd(remainder)
+                } else if first_word == CMD_PWD {
+                    pwd()
+                } else if first_word == CMD_TYPE {
+                    type_of(remainder, &builtins)
+                } else if let Some(exec_path) = find_executable_in_path(first_word) {
+                    let argv = tokenize(remainder);
+                    _ = run_external_unix(exec_path, first_word, &argv);
+                } else {
+                    println!("{}: command not found", cmd)
+                }
+            },
+            Err(_) => break, // Handles Ctrl+C / Ctrl+D
         }
     }
 }
