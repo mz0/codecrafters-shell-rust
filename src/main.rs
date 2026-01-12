@@ -90,7 +90,7 @@ fn find_executable_in_path(name: &str) -> Option<PathBuf> {
 
         let candidate = dir.join(name);
 
-        if is_executable(&candidate) {
+        if is_unix_executable(&candidate) {
             return Some(candidate);
         }
     }
@@ -98,14 +98,11 @@ fn find_executable_in_path(name: &str) -> Option<PathBuf> {
     None
 }
 
-fn is_executable(path: &Path) -> bool {
-    let metadata = match std::fs::metadata(path) {
-        Ok(m) => m,
-        Err(_) => return false,
-    };
-
+fn is_unix_executable(path: &Path) -> bool {
     use std::os::unix::fs::PermissionsExt;
-    metadata.is_file() && (metadata.permissions().mode() & 0o111 != 0)
+    std::fs::metadata(path)
+        .map(|m| m.is_file() && (m.permissions().mode() & 0o111 != 0))
+        .unwrap_or(false)
 }
 
 fn pwd() {
