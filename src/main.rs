@@ -3,6 +3,8 @@ use std::io::{self, Write};
 use std::env;
 use std::path::{Path, PathBuf};
 use is_executable::IsExecutable;
+use rustyline::{Config, CompletionType, EditMode};
+use rustyline::config::BellStyle;
 
 pub const CMD_CD: &str = "cd";
 pub const CMD_ECHO: &str = "echo";
@@ -17,7 +19,14 @@ fn main() {
     let builtins = vec![CMD_CD, CMD_ECHO, CMD_EXIT, CMD_PWD, CMD_TYPE];
     let system_commands = get_all_executables(); // Scan PATH once
     let h = ShellHelper { builtins: builtins.clone(), system_commands };
-    let mut rl = rustyline::Editor::<ShellHelper, _>::new().unwrap();
+    let rlc = Config::builder()
+    .completion_type(CompletionType::List) // default: Emacs-style, cycles through candidates
+    .bell_style(BellStyle::Audible)
+    .edit_mode(EditMode::Emacs) // e.g. Ctrl-A, Home - Move cursor to the beginning of line
+    .max_history_size(1000)
+    .unwrap().completion_prompt_limit(200) // trigger alert when completion is too ambiguous
+    .build();
+    let mut rl = rustyline::Editor::<ShellHelper, _>::with_config(rlc).unwrap();
     rl.set_helper(Some(h));
 
     loop {
