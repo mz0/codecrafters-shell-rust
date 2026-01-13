@@ -2,6 +2,7 @@
 use std::io::{self, Write};
 use std::env;
 use std::path::{Path, PathBuf};
+use is_executable::IsExecutable;
 
 pub const CMD_CD: &str = "cd";
 pub const CMD_ECHO: &str = "echo";
@@ -14,7 +15,8 @@ use rline::ShellHelper;
 
 fn main() {
     let builtins = vec![CMD_CD, CMD_ECHO, CMD_EXIT, CMD_PWD, CMD_TYPE];
-    let h = ShellHelper { builtins: builtins.clone() };
+    let system_commands = get_all_executables(); // Scan PATH once
+    let h = ShellHelper { builtins: builtins.clone(), system_commands };
     let mut rl = rustyline::Editor::<ShellHelper, _>::new().unwrap();
     rl.set_helper(Some(h));
 
@@ -59,6 +61,7 @@ fn tokenize(input: &str) -> Vec<String> {
         .collect()
 }
 
+/// only Unix lets argv[0]=name substitution
 fn run_external_unix(path: PathBuf, name: &str, args: &[String]) -> io::Result<i32> {
     use std::os::unix::process::CommandExt;
     let status = std::process::Command::new(path)
@@ -99,7 +102,7 @@ fn find_executable_in_path(name: &str) -> Option<PathBuf> {
 
         let candidate = dir.join(name);
 
-        if is_unix_executable(&candidate) {
+        if candidate.is_executable() {
             return Some(candidate);
         }
     }
@@ -107,11 +110,26 @@ fn find_executable_in_path(name: &str) -> Option<PathBuf> {
     None
 }
 
-fn is_unix_executable(path: &Path) -> bool {
-    use std::os::unix::fs::PermissionsExt;
-    std::fs::metadata(path)
-        .map(|m| m.is_file() && (m.permissions().mode() & 0o111 != 0))
-        .unwrap_or(false)
+fn get_all_executables() -> Vec<String> {
+    let mut execs = Vec::new();
+
+    if let Some(path_var) = env::var_os("PATH") {
+        for path in env::split_paths(&path_var) {
+            if let Ok(entries) = std::fs::read_dir(path) {
+                for entry in entries.flatten() {
+                    let p = entry.path();
+                    if p.is_executable() {
+                        if let Some(name) = p.file_name().and_then(|n| n.to_str()) {
+                            execs.push(name.to_string());
+                        }
+                    }
+                }
+            }
+        }
+    }
+    execs.sort();
+    execs.dedup(); // Remove duplicates (e.g., if 'ls' is in two PATH folders)
+    execs
 }
 
 fn pwd() {

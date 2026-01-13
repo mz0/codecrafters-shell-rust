@@ -1,4 +1,3 @@
-// completion.rs
 use rustyline::completion::{Completer, Pair};
 use rustyline::error::ReadlineError;
 use rustyline::hint::Hinter;
@@ -8,6 +7,7 @@ use rustyline::{Context, Helper};
 
 pub struct ShellHelper {
     pub builtins: Vec<&'static str>,
+    pub system_commands: Vec<String>,
 }
 
 impl Completer for ShellHelper {
@@ -20,16 +20,23 @@ impl Completer for ShellHelper {
         let start = sub.rfind(' ').map_or(0, |i| i + 1);
         let word = &sub[start..];
 
-        let matches: Vec<Pair> = self.builtins
-            .iter()
-            .filter(|cmd| cmd.starts_with(word))
+        let builtin_matches = self.builtins.iter()
+            .filter(|c| c.starts_with(word))
+            .map(|&c| c.to_string());
+
+        let system_matches = self.system_commands.iter()
+            .filter(|c| c.starts_with(word))
+            .cloned();
+
+        let candidates: Vec<Pair> = builtin_matches
+            .chain(system_matches)
             .map(|cmd| Pair {
-                display: cmd.to_string(),
-                replacement: format!("{} ", cmd), // e.g. "echo " (add space)
+                display: cmd.clone(),
+                replacement: format!("{} ", cmd),
             })
             .collect();
 
-        Ok((start, matches))
+        Ok((start, candidates))
     }
 }
 
