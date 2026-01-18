@@ -15,6 +15,9 @@ pub const CMD_TYPE: &str = "type";
 mod rline;
 use rline::ShellHelper;
 
+mod parse;
+use parse::{parse, Command};
+
 fn main() {
     let builtins = vec![CMD_CD, CMD_ECHO, CMD_EXIT, CMD_PWD, CMD_TYPE];
     let system_commands = get_all_executables(); // Scan PATH once
@@ -33,41 +36,40 @@ fn main() {
         // Prompt
         match rl.readline("$ ") {
             Ok(line) => {
-                let cmd = line.trim();
-                if cmd.is_empty() { continue; }
+                let cmd_line = line.trim();
+                if cmd_line.is_empty() { continue; }
 
-                _ = rl.add_history_entry(cmd);
-                if cmd == CMD_EXIT { break }
+                _ = rl.add_history_entry(cmd_line);
 
-                let (first_word, remainder) = cmd.split_once(char::is_whitespace)
-                    .unwrap_or((cmd, ""));
+                match parse(cmd_line) {
+                    Command::SimpleCommand(cmd, args) => {
+                        if cmd == CMD_EXIT { break }
 
-                if first_word == CMD_ECHO {
-                    echo(remainder)
-                } else if first_word == CMD_CD {
-                    cd(remainder)
-                } else if first_word == CMD_PWD {
-                    pwd()
-                } else if first_word == CMD_TYPE {
-                    type_of(remainder, &builtins)
-                } else if let Some(exec_path) = find_executable_in_path(first_word) {
-                    let argv = tokenize(remainder);
-                    _ = run_external_unix(exec_path, first_word, &argv);
-                } else {
-                    println!("{}: command not found", cmd)
+                        if cmd == CMD_ECHO {
+                            echo(&args);
+                        } else if cmd == CMD_CD {
+                            cd(&args)
+                        } else if cmd == CMD_PWD {
+                            pwd()
+                        } else if cmd == CMD_TYPE {
+                            type_of(&args, &builtins)
+                        } else if let Some(exec_path) = find_executable_in_path(&cmd) {
+                            _ = run_external_unix(exec_path, &cmd, &args);
+                        } else {
+                            println!("{cmd}: command not found")
+                        }
+                    },
+                    Command::PipeCommand(_, _) => {
+                        println!("Pipes not implemented yet");
+                    },
+                    Command::InvalidCommand(err) => {
+                        println!("Error: {}", err);
+                    }
                 }
             },
             Err(_) => break, // Handles Ctrl+C / Ctrl+D
         }
     }
-}
-
-// extra simple tokenizer for now
-fn tokenize(input: &str) -> Vec<String> {
-    input
-        .split_whitespace()
-        .map(str::to_owned)
-        .collect()
 }
 
 /// only Unix lets argv[0]=name substitution
@@ -81,20 +83,24 @@ fn run_external_unix(path: PathBuf, name: &str, args: &[String]) -> io::Result<i
     Ok(exit_code)
 }
 
-fn type_of(s: &str, builtins: &[&str]) {
-    if builtins.contains(&s) {
-        println!("{} is a shell builtin", s);
+fn type_of(args: &[String], builtins: &[&str]) {
+    if args.is_empty() {
+        return;
+    }
+    let s = &args[0];
+    if builtins.contains(&s.as_str()) {
+        println!("{s} is a shell builtin");
         return
     }
 
     match find_executable_in_path(s) {
-        Some(path) => println!("{} is {}", s, path.display()),
-        None => println!("{}: not found", s),
+        Some(path) => println!("{s} is {}", path.display()),
+        None => println!("{s}: not found"),
     }
 }
 
-fn echo(s: &str) {
-    println!("{}", s);
+fn echo(args: &[String]) {
+    println!("{}", args.join(" "));
 }
 
 fn find_executable_in_path(name: &str) -> Option<PathBuf> {
@@ -146,8 +152,13 @@ fn pwd() {
     println!("{}", cwd.display());
 }
 
-fn cd(cd_path: &str) {
-    if cd_path.is_empty() { return }
+fn cd(args: &[String]) {
+    let cd_path = if args.is_empty() {
+        "~"
+    } else {
+        &args[0]
+    };
+
     let path: String = if cd_path == "~" {
         env::var_os("HOME").unwrap_or_else(|| ".".into()).to_string_lossy().into_owned()
     } else {
