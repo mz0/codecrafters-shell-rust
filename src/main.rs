@@ -11,9 +11,8 @@ use shlib::{
 };
 
 fn main() {
-    let builtins_list = builtins::all();
     let system_commands = get_all_executables(); // Scan PATH once
-    let h = ShellHelper { builtins: builtins_list.clone(), system_commands };
+    let h = ShellHelper { builtins: builtins::all().clone(), system_commands };
     let mut rl = shlib::create_editor(h).unwrap();
 
     loop {
@@ -32,15 +31,15 @@ fn main() {
                         let mut stdout = io::stdout();
                         let mut stderr = io::stderr();
                         if cmd == builtins::CMD_ECHO {
-                            _ = builtins::echo(&args, &mut stdout);
+                            _ = builtins::echo(&args, &mut stdout, &mut stderr);
                         } else if cmd == builtins::CMD_CD {
-                            builtins::cd(&args)
+                            _ = builtins::cd(&args, &mut stdout, &mut stderr);
                         } else if cmd == builtins::CMD_PWD {
-                            _ = builtins::pwd(&mut stdout, &mut stderr)
+                            _ = builtins::pwd(&args, &mut stdout, &mut stderr);
                         } else if cmd == builtins::CMD_TYPE {
-                            _ = builtins::type_of(&args, &builtins_list, &mut stdout)
+                            _ = builtins::type_of(&args, &mut stdout, &mut stderr);
                         } else if let Some(exec_path) = find_executable_in_path(&cmd) {
-                            _ = run_external_unix(exec_path, &cmd, &args);
+                            _ = run_external_unix(exec_path, &cmd, &args, &mut stdout, &mut stderr);
                         } else {
                             println!("{cmd}: command not found")
                         }
@@ -59,12 +58,15 @@ fn main() {
 }
 
 /// only Unix lets argv[0]=name substitution
-fn run_external_unix(path: PathBuf, name: &str, args: &[String]) -> io::Result<i32> {
+fn run_external_unix(path: PathBuf, name: &str, args: &[String], stdout: &mut dyn Write, stderr: &mut dyn Write) -> io::Result<i32> {
     use std::os::unix::process::CommandExt;
-    let status = std::process::Command::new(path)
+    let output = std::process::Command::new(path)
         .arg0(name)
         .args(args)
-        .status()?;
-    let exit_code = status.code().unwrap_or_else(|| { 128 }); // Terminated
+        .stdin(std::process::Stdio::inherit())
+        .output()?;
+    stdout.write_all(&output.stdout)?;
+    stderr.write_all(&output.stderr)?;
+    let exit_code = output.status.code().unwrap_or(128);
     Ok(exit_code)
 }
