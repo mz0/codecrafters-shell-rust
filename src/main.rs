@@ -1,6 +1,7 @@
-#[allow(unused_imports)]
-use std::io::{self, Write};
-use std::path::PathBuf;
+use std::io::{self};
+
+mod pipeline;
+mod external;
 
 // Import from our library
 use shlib::{
@@ -39,34 +40,20 @@ fn main() {
                         } else if cmd == builtins::CMD_TYPE {
                             _ = builtins::type_of(&args, &mut stdout, &mut stderr);
                         } else if let Some(exec_path) = find_executable_in_path(&cmd) {
-                            _ = run_external_unix(exec_path, &cmd, &args, &mut stdout, &mut stderr);
+                            _ = external::run_unix(exec_path, &cmd, &args);
                         } else {
-                            println!("{cmd}: command not found")
+                            eprintln!("{cmd}: command not found")
                         }
                     },
-                    Command::PipeCommand(_, _) => {
-                        println!("Pipes not implemented yet");
+                    Command::PipeCommand(left, right) => {
+                        pipeline::run_pipeline(&left, &right);
                     },
                     Command::InvalidCommand(err) => {
-                        println!("Error: {}", err);
+                        eprintln!("Error: {}", err);
                     }
                 }
             },
             Err(_) => break, // Handles Ctrl+C / Ctrl+D
         }
     }
-}
-
-/// only Unix lets argv[0]=name substitution
-fn run_external_unix(path: PathBuf, name: &str, args: &[String], stdout: &mut dyn Write, stderr: &mut dyn Write) -> io::Result<i32> {
-    use std::os::unix::process::CommandExt;
-    let output = std::process::Command::new(path)
-        .arg0(name)
-        .args(args)
-        .stdin(std::process::Stdio::inherit())
-        .output()?;
-    stdout.write_all(&output.stdout)?;
-    stderr.write_all(&output.stderr)?;
-    let exit_code = output.status.code().unwrap_or(128);
-    Ok(exit_code)
 }
