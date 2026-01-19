@@ -29,14 +29,16 @@ fn main() {
                     Command::SimpleCommand(cmd, args) => {
                         if cmd == builtins::CMD_EXIT { break }
 
+                        let mut stdout = io::stdout();
+                        let mut stderr = io::stderr();
                         if cmd == builtins::CMD_ECHO {
-                            builtins::echo(&args);
+                            _ = builtins::echo(&args, &mut stdout);
                         } else if cmd == builtins::CMD_CD {
                             builtins::cd(&args)
                         } else if cmd == builtins::CMD_PWD {
-                            builtins::pwd()
+                            _ = builtins::pwd(&mut stdout, &mut stderr)
                         } else if cmd == builtins::CMD_TYPE {
-                            builtins::type_of(&args, &builtins_list)
+                            _ = builtins::type_of(&args, &builtins_list, &mut stdout)
                         } else if let Some(exec_path) = find_executable_in_path(&cmd) {
                             _ = run_external_unix(exec_path, &cmd, &args);
                         } else {

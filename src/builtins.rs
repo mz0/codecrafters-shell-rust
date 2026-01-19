@@ -1,5 +1,6 @@
 use crate::executables::find_executable_in_path;
 use std::env;
+use std::io::{Write, Result};
 use std::path::Path;
 
 pub const CMD_CD: &str = "cd";
@@ -12,30 +13,31 @@ pub fn all() -> Vec<&'static str> {
     vec![CMD_CD, CMD_ECHO, CMD_EXIT, CMD_PWD, CMD_TYPE]
 }
 
-pub fn type_of(args: &[String], builtins: &[&str]) {
+pub fn type_of(args: &[String], builtins: &[&str], writer: &mut dyn Write) -> Result<()> {
     if args.is_empty() {
-        return;
+        return Ok(());
     }
     let s = &args[0];
     if builtins.contains(&s.as_str()) {
-        println!("{s} is a shell builtin");
-        return;
+        writeln!(writer, "{s} is a shell builtin")?;
+        return Ok(());
     }
 
     match find_executable_in_path(s) {
-        Some(path) => println!("{s} is {}", path.display()),
-        None => println!("{s}: not found"),
+        Some(path) => writeln!(writer, "{s} is {}", path.display())?,
+        None => eprintln!("{s}: not found"),
     }
+    Ok(())
 }
 
-pub fn echo(args: &[String]) {
-    println!("{}", args.join(" "));
+pub fn echo(args: &[String], stdout: &mut dyn Write) -> Result<()> {
+    writeln!(stdout, "{}", args.join(" "))
 }
 
-pub fn pwd() {
+pub fn pwd(stdout: &mut dyn Write, stderr: &mut dyn Write) -> Result<()> {
     match env::current_dir() {
-        Ok(cwd) => println!("{}", cwd.display()),
-        Err(e) => eprintln!("pwd: {}", e),
+        Ok(cwd) => writeln!(stdout, "{}", cwd.display()),
+        Err(e) => writeln!(stderr, "pwd: {}", e),
     }
 }
 
@@ -51,6 +53,6 @@ pub fn cd(args: &[String]) {
 
     let path = Path::new(&path_str);
     if let Err(e) = env::set_current_dir(path) {
-        println!("cd: {}: {}", path.display(), e);
+        eprintln!("cd: {}: {}", path.display(), e);
     }
 }
