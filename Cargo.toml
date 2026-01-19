@@ -5,6 +5,10 @@ authors = ["Codecrafters <hello@codecrafters.io>"]
 edition = "2024"
 rust-version = "1.91"
 
+[lib]
+name = "shlib"
+path = "src/lib.rs"
+
 [dependencies]
 anyhow = "1.0.68"                                # error handling
 bytes = "1.3.0"                                  # helps manage buffers

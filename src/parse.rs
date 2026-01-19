@@ -175,3 +175,142 @@ fn tokenize(s: &str) -> Result<Vec<String>, String> {
 
     Ok(tokens)
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_simple_command() {
+        let input = "ls -la";
+        let expected = Command::SimpleCommand("ls".to_string(), vec!["-la".to_string()]);
+        assert_eq!(parse(input), expected);
+    }
+
+    #[test]
+    fn test_quoted_arguments() {
+        let input = "echo 'hello world' \"foo bar\"";
+        let expected = Command::SimpleCommand(
+            "echo".to_string(),
+            vec!["hello world".to_string(), "foo bar".to_string()],
+        );
+        assert_eq!(parse(input), expected);
+    }
+
+    #[test]
+    fn test_mixed_quotes() {
+        let input = "echo \"it's me\" 'said \"hello\"'";
+        let expected = Command::SimpleCommand(
+            "echo".to_string(),
+            vec!["it's me".to_string(), "said \"hello\"".to_string()],
+        );
+        assert_eq!(parse(input), expected);
+    }
+
+    #[test]
+    fn test_escaped_characters() {
+        let input = "echo hello\\ world";
+        let expected = Command::SimpleCommand(
+            "echo".to_string(),
+            vec!["hello world".to_string()],
+        );
+        assert_eq!(parse(input), expected);
+    }
+
+    #[test]
+    fn test_escaped_quotes() {
+        let input = "echo \\\"hello\\\"";
+        let expected = Command::SimpleCommand(
+            "echo".to_string(),
+            vec!["\"hello\"".to_string()],
+        );
+        assert_eq!(parse(input), expected);
+    }
+
+    #[test]
+    fn test_pipe_command() {
+        let input = "cat file.txt | grep pattern";
+        let expected = Command::PipeCommand(
+            Box::new(Command::SimpleCommand(
+                "cat".to_string(),
+                vec!["file.txt".to_string()],
+            )),
+            Box::new(Command::SimpleCommand(
+                "grep".to_string(),
+                vec!["pattern".to_string()],
+            )),
+        );
+        assert_eq!(parse(input), expected);
+    }
+
+    #[test]
+    fn test_multiple_pipes() {
+        let input = "cat file | grep foo | wc -l";
+        let expected = Command::PipeCommand(
+            Box::new(Command::PipeCommand(
+                Box::new(Command::SimpleCommand(
+                    "cat".to_string(),
+                    vec!["file".to_string()],
+                )),
+                Box::new(Command::SimpleCommand(
+                    "grep".to_string(),
+                    vec!["foo".to_string()],
+                )),
+            )),
+            Box::new(Command::SimpleCommand(
+                "wc".to_string(),
+                vec!["-l".to_string()],
+            )),
+        );
+        assert_eq!(parse(input), expected);
+    }
+
+    #[test]
+    fn test_pipe_with_quotes() {
+        let input = "echo 'foo | bar' | cat";
+        let expected = Command::PipeCommand(
+            Box::new(Command::SimpleCommand(
+                "echo".to_string(),
+                vec!["foo | bar".to_string()],
+            )),
+            Box::new(Command::SimpleCommand("cat".to_string(), vec![])),
+        );
+        assert_eq!(parse(input), expected);
+    }
+
+    #[test]
+    fn test_unpaired_quote() {
+        let input = "echo \"hello";
+        match parse(input) {
+            Command::InvalidCommand(msg) => assert_eq!(msg, "Unpaired quote"),
+            _ => panic!("Expected InvalidCommand"),
+        }
+    }
+
+    #[test]
+    fn test_trailing_backslash() {
+        let input = "echo hello\\";
+        match parse(input) {
+            Command::InvalidCommand(msg) => assert_eq!(msg, "Trailing backslash"),
+            _ => panic!("Expected InvalidCommand"),
+        }
+    }
+
+    #[test]
+    fn test_empty_command() {
+        let input = "";
+        match parse(input) {
+            Command::InvalidCommand(msg) => assert_eq!(msg, "Empty command"),
+            _ => panic!("Expected InvalidCommand"),
+        }
+    }
+
+    #[test]
+    fn test_whitespace_only() {
+        let input = "   ";
+        match parse(input) {
+            Command::InvalidCommand(msg) => assert_eq!(msg, "Empty command"),
+            _ => panic!("Expected InvalidCommand"),
+        }
+    }
+}

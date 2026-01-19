@@ -12,11 +12,8 @@ pub const CMD_EXIT: &str = "exit";
 pub const CMD_PWD: &str = "pwd";
 pub const CMD_TYPE: &str = "type";
 
-mod rline;
-use rline::ShellHelper;
-
-mod parse;
-use parse::{parse, Command};
+use shlib::rline::ShellHelper;
+use shlib::parse::{parse, Command};
 
 fn main() {
     let builtins = vec![CMD_CD, CMD_ECHO, CMD_EXIT, CMD_PWD, CMD_TYPE];
