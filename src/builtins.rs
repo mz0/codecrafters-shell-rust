@@ -1,6 +1,6 @@
 use crate::executables::find_executable_in_path;
 use std::env;
-use std::io::{Write, Result};
+use std::io::{self, Write, Result};
 use std::path::Path;
 
 pub const CMD_CD: &str = "cd";
@@ -53,7 +53,10 @@ pub fn cd(args: &[String], _stdout: &mut dyn Write, stderr: &mut dyn Write) -> R
 
     let path = Path::new(&path_str);
     if let Err(e) = env::set_current_dir(path) {
-        writeln!(stderr, "cd: {}: {}", path.display(), e)?;
+        match e.kind() {
+            io::ErrorKind::NotFound => writeln!(stderr, "cd: {}: No such file or directory", path.display())?,
+            _ => writeln!(stderr, "cd: {}: {}", path.display(), e)?,
+        }
     }
     Ok(())
 }
