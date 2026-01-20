@@ -31,14 +31,8 @@ fn main() {
 
                         let mut stdout = io::stdout();
                         let mut stderr = io::stderr();
-                        if cmd == builtins::CMD_ECHO {
-                            _ = builtins::echo(&args, &mut stdout, &mut stderr);
-                        } else if cmd == builtins::CMD_CD {
-                            _ = builtins::cd(&args, &mut stdout, &mut stderr);
-                        } else if cmd == builtins::CMD_PWD {
-                            _ = builtins::pwd(&args, &mut stdout, &mut stderr);
-                        } else if cmd == builtins::CMD_TYPE {
-                            _ = builtins::type_of(&args, &mut stdout, &mut stderr);
+                        if builtins::all().contains(&&*cmd) {
+                            _ = builtins::run_builtin(&*cmd, &args, &mut stdout, &mut stderr);
                         } else if let Some(exec_path) = find_executable_in_path(&cmd) {
                             _ = external::run_unix(exec_path, &cmd, &args);
                         } else {

@@ -1,7 +1,31 @@
 use crate::executables::find_executable_in_path;
+use std::collections::HashMap;
 use std::env;
 use std::io::{self, Write, Result};
 use std::path::Path;
+
+use std::sync::LazyLock;
+
+type BuiltinFn = fn(args: &[String], stdout: &mut dyn Write, stderr: &mut dyn Write) -> Result<()>;
+static BUILTINS: LazyLock<HashMap<&'static str, BuiltinFn>> = LazyLock::new(|| {
+    let mut m: HashMap<&'static str, BuiltinFn> = HashMap::new();
+    m.insert("cd", cd);
+    m.insert("echo", echo);
+    m.insert("pwd", pwd);
+    m.insert("type", type_of);
+    m
+});
+
+pub fn run_builtin(
+    cmd: &str,
+    args: &[String],
+    stdout: &mut dyn Write,
+    stderr: &mut dyn Write
+) -> Option<Result<()>> {
+    // Look up the function in our map
+    let fun = BUILTINS.get(cmd)?;
+    Some(fun(args, stdout, stderr))
+}
 
 pub const CMD_CD: &str = "cd";
 pub const CMD_ECHO: &str = "echo";
