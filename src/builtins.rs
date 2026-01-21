@@ -1,18 +1,20 @@
 use crate::executables::find_executable_in_path;
+use crate::history;
+
 use std::collections::HashMap;
 use std::env;
 use std::io::{self, Write, Result};
 use std::path::Path;
-
 use std::sync::LazyLock;
 
 type BuiltinFn = fn(args: &[String], stdout: &mut dyn Write, stderr: &mut dyn Write) -> Result<()>;
 static BUILTINS: LazyLock<HashMap<&'static str, BuiltinFn>> = LazyLock::new(|| {
     let mut m: HashMap<&'static str, BuiltinFn> = HashMap::new();
-    m.insert("cd", cd);
-    m.insert("echo", echo);
-    m.insert("pwd", pwd);
-    m.insert("type", type_of);
+    m.insert(CMD_CD, cd);
+    m.insert(CMD_ECHO, echo);
+    m.insert(CMD_HISTORY, history);
+    m.insert(CMD_PWD, pwd);
+    m.insert(CMD_TYPE, type_of);
     m
 });
 
@@ -30,11 +32,12 @@ pub fn run_builtin(
 pub const CMD_CD: &str = "cd";
 pub const CMD_ECHO: &str = "echo";
 pub const CMD_EXIT: &str = "exit";
+pub const CMD_HISTORY: &str = "history";
 pub const CMD_PWD: &str = "pwd";
 pub const CMD_TYPE: &str = "type";
 
 pub fn all() -> Vec<&'static str> {
-    vec![CMD_CD, CMD_ECHO, CMD_EXIT, CMD_PWD, CMD_TYPE]
+    vec![CMD_CD, CMD_ECHO, CMD_EXIT, CMD_HISTORY, CMD_PWD, CMD_TYPE]
 }
 
 pub fn type_of(args: &[String], stdout: &mut dyn Write, stderr: &mut dyn Write) -> Result<()> {
@@ -56,6 +59,11 @@ pub fn type_of(args: &[String], stdout: &mut dyn Write, stderr: &mut dyn Write) 
 
 pub fn echo(args: &[String], stdout: &mut dyn Write, _stderr: &mut dyn Write) -> Result<()> {
     writeln!(stdout, "{}", args.join(" "))
+}
+
+pub fn history(_args: &[String], stdout: &mut dyn Write, _stderr: &mut dyn Write) -> Result<()> {
+    history::print(stdout);
+    Ok(())
 }
 
 pub fn pwd(_args: &[String], stdout: &mut dyn Write, stderr: &mut dyn Write) -> Result<()> {

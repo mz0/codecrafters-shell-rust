@@ -1,10 +1,7 @@
 use std::io::{self};
 
-// Import from our library
 use shlib::{
-    builtins,
-    external,
-    pipeline,
+    builtins, external, history, pipeline,
     parse::{parse, Command},
     executables::{find_executable_in_path, get_all_executables},
     rline::ShellHelper,
@@ -23,6 +20,7 @@ fn main() {
                 if cmd_line.is_empty() { continue; }
 
                 _ = rl.add_history_entry(cmd_line);
+                history::add(cmd_line);
 
                 match parse(cmd_line) {
                     Command::SimpleCommand(cmd, args) => {

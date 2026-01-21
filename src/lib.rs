@@ -8,6 +8,7 @@ pub mod rline;
 pub mod builtins;
 pub mod executables;
 pub mod external;
+pub mod history;
 pub mod pipeline;
 
 

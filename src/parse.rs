@@ -47,8 +47,9 @@ fn parse_simple(s: &str) -> Command {
         return Command::InvalidCommand("Empty command".to_string());
     }
 
-    let cmd = tokens[0].clone();
-    let args = tokens[1..].to_vec();
+    let mut tokens_iter = tokens.into_iter();
+    let cmd = tokens_iter.next().unwrap();
+    let args = tokens_iter.collect();
     Command::SimpleCommand(cmd, args)
 }
 
