@@ -1,4 +1,6 @@
-use std::io::Write;
+use std::fs::File;
+use std::io::{BufRead, BufReader, Write};
+use std::path::Path;
 use std::sync::{Mutex, OnceLock};
 
 static HISTORY: OnceLock<Mutex<Vec<String>>> = OnceLock::new();
@@ -43,4 +45,27 @@ pub fn print(stdout: &mut dyn Write, limit: Option<usize>) {
     for (i, command) in history.iter().enumerate().skip(start_index) {
         let _ = writeln!(stdout, "{:5}  {}", i + 1, command);
     }
+}
+
+/// Writes the current history to a file.
+pub fn write_to_file(path: &Path) -> std::io::Result<()> {
+    let history_mutex = HISTORY.get_or_init(|| Mutex::new(Vec::new()));
+    let history = history_mutex.lock().unwrap();
+
+    let mut file = File::create(path)?;
+    for command in history.iter() {
+        writeln!(file, "{}", command)?;
+    }
+    Ok(())
+}
+
+/// Reads history from a file, appending to the current history.
+pub fn read_from_file(path: &Path) -> std::io::Result<()> {
+    let file = File::open(path)?;
+    let reader = BufReader::new(file);
+
+    for line in reader.lines() {
+        add(&line?);
+    }
+    Ok(())
 }

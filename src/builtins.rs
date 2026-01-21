@@ -62,18 +62,42 @@ pub fn echo(args: &[String], stdout: &mut dyn Write, _stderr: &mut dyn Write) ->
 }
 
 pub fn history(args: &[String], stdout: &mut dyn Write, stderr: &mut dyn Write) -> Result<()> {
-    let limit = if let Some(arg) = args.first() {
-        match arg.parse::<usize>() {
-            Ok(n) => Some(n),
-            Err(_) => {
-                writeln!(stderr, "history: {}: numeric argument required", arg)?;
-                return Ok(());
+    if let Some(first_arg) = args.first() {
+        match first_arg.as_str() {
+            "-r" => {
+                if let Some(path_str) = args.get(1) {
+                    let path = Path::new(path_str);
+                    if let Err(e) = history::read_from_file(path) {
+                        writeln!(stderr, "history: {}: {}", path.display(), e)?;
+                    }
+                } else {
+                    writeln!(stderr, "history: -r: option requires an argument")?;
+                }
+            }
+            "-w" => {
+                if let Some(path_str) = args.get(1) {
+                    let path = Path::new(path_str);
+                    if let Err(e) = history::write_to_file(path) {
+                        writeln!(stderr, "history: {}: {}", path.display(), e)?;
+                    }
+                } else {
+                    writeln!(stderr, "history: -w: option requires an argument")?;
+                }
+            }
+            _ => {
+                // Not a flag, try to parse as a number for limit
+                match first_arg.parse::<usize>() {
+                    Ok(n) => history::print(stdout, Some(n)),
+                    Err(_) => {
+                        writeln!(stderr, "history: {}: numeric argument required", first_arg)?;
+                    }
+                }
             }
         }
     } else {
-        None
-    };
-    history::print(stdout, limit);
+        // No arguments, print all history
+        history::print(stdout, None);
+    }
     Ok(())
 }
 
