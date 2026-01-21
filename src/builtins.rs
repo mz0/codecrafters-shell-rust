@@ -84,6 +84,16 @@ pub fn history(args: &[String], stdout: &mut dyn Write, stderr: &mut dyn Write) 
                     writeln!(stderr, "history: -w: option requires an argument")?;
                 }
             }
+            "-a" => {
+                if let Some(path_str) = args.get(1) {
+                    let path = Path::new(path_str);
+                    if let Err(e) = history::append_to_file(path) {
+                        writeln!(stderr, "history: {}: {}", path.display(), e)?;
+                    }
+                } else {
+                    writeln!(stderr, "history: -a: option requires an argument")?;
+                }
+            }
             _ => {
                 // Not a flag, try to parse as a number for limit
                 match first_arg.parse::<usize>() {
