@@ -61,8 +61,19 @@ pub fn echo(args: &[String], stdout: &mut dyn Write, _stderr: &mut dyn Write) ->
     writeln!(stdout, "{}", args.join(" "))
 }
 
-pub fn history(_args: &[String], stdout: &mut dyn Write, _stderr: &mut dyn Write) -> Result<()> {
-    history::print(stdout);
+pub fn history(args: &[String], stdout: &mut dyn Write, stderr: &mut dyn Write) -> Result<()> {
+    let limit = if let Some(arg) = args.first() {
+        match arg.parse::<usize>() {
+            Ok(n) => Some(n),
+            Err(_) => {
+                writeln!(stderr, "history: {}: numeric argument required", arg)?;
+                return Ok(());
+            }
+        }
+    } else {
+        None
+    };
+    history::print(stdout, limit);
     Ok(())
 }
 

@@ -31,11 +31,16 @@ pub fn add(command: &str) {
 
 /// Prints the current history to stdout.
 /// To be called by the `history` builtin.
-pub fn print(stdout: &mut dyn Write) {
+pub fn print(stdout: &mut dyn Write, limit: Option<usize>) {
     let history_mutex = HISTORY.get_or_init(|| Mutex::new(Vec::new()));
     let history = history_mutex.lock().unwrap();
 
-    for (i, command) in history.iter().enumerate() {
+    let start_index = match limit {
+        Some(n) => history.len().saturating_sub(n),
+        None => 0,
+    };
+
+    for (i, command) in history.iter().enumerate().skip(start_index) {
         let _ = writeln!(stdout, "{:5}  {}", i + 1, command);
     }
 }
