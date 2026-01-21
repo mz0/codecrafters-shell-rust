@@ -122,7 +122,17 @@ fn tokenize(s: &str) -> Result<Vec<String>, String> {
 
     for c in s.chars() {
         if escaped {
-            current_token.push(c);
+            if in_double_quote {
+                match c {
+                    '$' | '`' | '"' | '\\' | '\n' => current_token.push(c),
+                    _ => {
+                        current_token.push('\\');
+                        current_token.push(c);
+                    }
+                }
+            } else {
+                current_token.push(c);
+            }
             escaped = false;
             continue;
         }
@@ -226,6 +236,15 @@ mod tests {
             vec!["\"hello\"".to_string()],
         );
         assert_eq!(parse(input), expected);
+    }
+
+    #[test]
+    /// In double quotes Shell should only escape "$" "  " "`"   "\""   "\\"   "\n"
+    /// E.g. literal "\"\n\"" is treated as "\\n"
+    fn test_excessive_escaping_in_double_quotes() {
+        let input = "\"exe with \\'single quotes\\'\"";
+        let expect = Command::SimpleCommand("exe with \\'single quotes\\'".to_string(), vec![]);
+        assert_eq!(parse(input), expect);
     }
 
     #[test]
