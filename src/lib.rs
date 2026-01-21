@@ -7,6 +7,9 @@ pub mod parse;
 pub mod rline;
 pub mod builtins;
 pub mod executables;
+pub mod external;
+pub mod pipeline;
+
 
 pub fn create_editor(h: ShellHelper) -> rustyline::Result<rustyline::Editor<ShellHelper, DefaultHistory>> {
     let config = Config::builder()

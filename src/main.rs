@@ -1,11 +1,10 @@
 use std::io::{self};
 
-mod pipeline;
-mod external;
-
 // Import from our library
 use shlib::{
     builtins,
+    external,
+    pipeline,
     parse::{parse, Command},
     executables::{find_executable_in_path, get_all_executables},
     rline::ShellHelper,
@@ -39,8 +38,8 @@ fn main() {
                             eprintln!("{cmd}: command not found")
                         }
                     },
-                    Command::PipeCommand(left, right) => {
-                        pipeline::run_pipeline(&left, &right);
+                    Command::PipeCommand(commands) => {
+                        pipeline::run_pipeline(&commands);
                     },
                     Command::InvalidCommand(err) => {
                         eprintln!("Error: {}", err);

@@ -5,7 +5,7 @@ use std::process::Command;
 
 /// Prepares a Command object with the executable path and arguments.
 /// Handles argv[0] setting.
-pub fn prepare_unix_command(path: &Path, name: &str, args: &[String]) -> Command {
+pub(crate) fn prepare_unix_command(path: &Path, name: &str, args: &[String]) -> Command {
     let mut cmd = Command::new(path);
     cmd.arg0(name).args(args);
     cmd

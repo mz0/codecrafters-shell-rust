@@ -1,7 +1,7 @@
 #[derive(Debug, PartialEq)]
 pub enum Command {
     SimpleCommand(String, Vec<String>),
-    PipeCommand(Box<Command>, Box<Command>),
+    PipeCommand(Vec<Command>),
     InvalidCommand(String),
 }
 
@@ -20,24 +20,20 @@ pub fn parse(s: &str) -> Command {
         return Command::InvalidCommand("Empty command".to_string());
     }
 
-    let mut iter = parts.into_iter();
-    let first = iter.next().unwrap();
-    let mut cmd = parse_simple(&first);
-
-    // If the first part is invalid, return it immediately
-    if let Command::InvalidCommand(_) = cmd {
-        return cmd;
-    }
-
-    for part in iter {
-        let next_cmd = parse_simple(&part);
-        if let Command::InvalidCommand(_) = next_cmd {
-            return next_cmd;
+    let mut commands = Vec::new();
+    for part in parts {
+        let cmd = parse_simple(&part);
+        if let Command::InvalidCommand(_) = cmd {
+            return cmd;
         }
-        cmd = Command::PipeCommand(Box::new(cmd), Box::new(next_cmd));
+        commands.push(cmd);
     }
 
-    cmd
+    if commands.len() == 1 {
+        commands.pop().unwrap()
+    } else {
+        Command::PipeCommand(commands)
+    }
 }
 
 fn parse_simple(s: &str) -> Command {
@@ -230,51 +226,49 @@ mod tests {
     #[test]
     fn test_pipe_command() {
         let input = "cat file.txt | grep pattern";
-        let expected = Command::PipeCommand(
-            Box::new(Command::SimpleCommand(
+        let expected = Command::PipeCommand(vec![
+            Command::SimpleCommand(
                 "cat".to_string(),
                 vec!["file.txt".to_string()],
-            )),
-            Box::new(Command::SimpleCommand(
+            ),
+            Command::SimpleCommand(
                 "grep".to_string(),
                 vec!["pattern".to_string()],
-            )),
-        );
+            ),
+        ]);
         assert_eq!(parse(input), expected);
     }
 
     #[test]
     fn test_multiple_pipes() {
         let input = "cat file | grep foo | wc -l";
-        let expected = Command::PipeCommand(
-            Box::new(Command::PipeCommand(
-                Box::new(Command::SimpleCommand(
-                    "cat".to_string(),
-                    vec!["file".to_string()],
-                )),
-                Box::new(Command::SimpleCommand(
-                    "grep".to_string(),
-                    vec!["foo".to_string()],
-                )),
-            )),
-            Box::new(Command::SimpleCommand(
+        let expected = Command::PipeCommand(vec![
+            Command::SimpleCommand(
+                "cat".to_string(),
+                vec!["file".to_string()],
+            ),
+            Command::SimpleCommand(
+                "grep".to_string(),
+                vec!["foo".to_string()],
+            ),
+            Command::SimpleCommand(
                 "wc".to_string(),
                 vec!["-l".to_string()],
-            )),
-        );
+            ),
+        ]);
         assert_eq!(parse(input), expected);
     }
 
     #[test]
     fn test_pipe_with_quotes() {
         let input = "echo 'foo | bar' | cat";
-        let expected = Command::PipeCommand(
-            Box::new(Command::SimpleCommand(
+        let expected = Command::PipeCommand(vec![
+            Command::SimpleCommand(
                 "echo".to_string(),
                 vec!["foo | bar".to_string()],
-            )),
-            Box::new(Command::SimpleCommand("cat".to_string(), vec![])),
-        );
+            ),
+            Command::SimpleCommand("cat".to_string(), vec![]),
+        ]);
         assert_eq!(parse(input), expected);
     }
 

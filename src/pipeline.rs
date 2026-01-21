@@ -1,135 +1,155 @@
-use std::process::Stdio;
+use std::process::{Stdio, Child};
+use std::thread;
 
-use shlib::executables::find_executable_in_path;
-use shlib::parse::Command;
-use crate::external::prepare_unix_command;
+use crate::executables::find_executable_in_path;
+use crate::parse::Command;
 use crate::builtins;
+use crate::external::prepare_unix_command;
 
-pub fn run_pipeline(left: &Command, right: &Command) {
-    let (left_cmd, left_args) = match left {
-        Command::SimpleCommand(cmd, args) => (cmd, args),
-        _ => {
-            eprintln!("Complex commands in pipes not supported yet");
-            return;
-        }
-    };
+pub fn run_pipeline(commands: &[Command]) {
+    if commands.is_empty() {
+        return;
+    }
 
-    let (right_cmd, right_args) = match right {
-        Command::SimpleCommand(cmd, args) => (cmd, args),
-        _ => {
-            eprintln!("Complex commands in pipes not supported yet");
-            return;
-        }
-    };
+    let mut children: Vec<Child> = Vec::new();
+    let mut input_source: Stdio = Stdio::inherit();
+    let mut i = 0;
 
-    let left_is_builtin = builtins::all().contains(&left_cmd.as_str());
-    let right_is_builtin = builtins::all().contains(&right_cmd.as_str());
-
-    if !left_is_builtin && !right_is_builtin {
-        let left_path = match find_executable_in_path(left_cmd) {
-            Some(path) => path,
-            None => {
-                eprintln!("{}: command not found", left_cmd);
-                return;
-            }
+    while i < commands.len() {
+        let cmd = &commands[i];
+        let is_last = i == commands.len() - 1;
+        let is_builtin = match cmd {
+            Command::SimpleCommand(c, _) => builtins::all().contains(&c.as_str()),
+            _ => false,
         };
 
-        let right_path = match find_executable_in_path(right_cmd) {
-            Some(path) => path,
-            None => {
-                eprintln!("{}: command not found", right_cmd);
-                return;
-            }
-        };
+        if !is_builtin {
+            // External
+            let (cmd_name, args) = match cmd {
+                Command::SimpleCommand(c, a) => (c, a),
+                _ => unreachable!(),
+            };
 
-        let mut left_child = match prepare_unix_command(&left_path, left_cmd, left_args)
-            .stdout(Stdio::piped())
-            .spawn()
-        {
-            Ok(child) => child,
-            Err(e) => {
-                eprintln!("Failed to start {}: {}", left_cmd, e);
-                return;
-            }
-        };
+            let path = match find_executable_in_path(cmd_name) {
+                Some(p) => p,
+                None => {
+                    eprintln!("{}: command not found", cmd_name);
+                    return;
+                }
+            };
 
-        let left_stdout = left_child.stdout.take().expect("Failed to open stdout");
+            let stdout_target = if is_last { Stdio::inherit() } else { Stdio::piped() };
 
-        let mut right_child = match prepare_unix_command(&right_path, right_cmd, right_args)
-            .stdin(Stdio::from(left_stdout))
-            .spawn()
-        {
-            Ok(child) => child,
-            Err(e) => {
-                eprintln!("Failed to start {}: {}", right_cmd, e);
-                let _ = left_child.kill();
-                return;
-            }
-        };
-
-        let _ = left_child.wait();
-        let _ = right_child.wait();
-    } else if right_is_builtin {
-        let mut left_child = None;
-
-        if left_is_builtin {
-            let mut sink = std::io::sink();
-            let mut stderr = std::io::stderr();
-            let _ = builtins::run_builtin(left_cmd, left_args, &mut sink, &mut stderr);
-        } else {
-            if let Some(left_path) = find_executable_in_path(left_cmd) {
-                match prepare_unix_command(&left_path, left_cmd, left_args)
-                    .stdout(Stdio::piped())
-                    .spawn()
-                {
-                    Ok(mut c) => {
-                        // Drop the read end of the pipe immediately to simulate closed stdin on the right
-                        drop(c.stdout.take());
-                        left_child = Some(c);
-                    },
-                    Err(e) => {
-                        eprintln!("Failed to start {}: {}", left_cmd, e);
-                        return;
+            match prepare_unix_command(&path, cmd_name, args)
+                .stdin(input_source)
+                .stdout(stdout_target)
+                .spawn()
+            {
+                Ok(mut child) => {
+                    if !is_last {
+                        input_source = Stdio::from(child.stdout.take().unwrap());
+                    } else {
+                        input_source = Stdio::inherit();
                     }
-                };
+                    children.push(child);
+                },
+                Err(e) => {
+                    eprintln!("Failed to start {}: {}", cmd_name, e);
+                    return;
+                }
+            }
+            i += 1;
+        } else {
+            // Builtin
+            // Builtins ignore stdin, so we close the previous pipe if any.
+            input_source = Stdio::inherit();
+
+            let (cmd_name, args) = match cmd {
+                Command::SimpleCommand(c, a) => (c, a),
+                _ => unreachable!(),
+            };
+
+            if is_last {
+                let mut stdout = std::io::stdout();
+                let mut stderr = std::io::stderr();
+                let _ = builtins::run_builtin(cmd_name, args, &mut stdout, &mut stderr);
+                i += 1;
             } else {
-                eprintln!("{}: command not found", left_cmd);
+                // Look ahead
+                let next_cmd = &commands[i+1];
+                let next_is_builtin = match next_cmd {
+                    Command::SimpleCommand(c, _) => builtins::all().contains(&c.as_str()),
+                    _ => false,
+                };
+
+                if next_is_builtin {
+                    // Builtin | Builtin
+                    // Run current to sink
+                    let mut sink = std::io::sink();
+                    let mut stderr = std::io::stderr();
+                    let _ = builtins::run_builtin(cmd_name, args, &mut sink, &mut stderr);
+
+                    i += 1;
+                } else {
+                    // Builtin | External
+                    // Spawn External (next_cmd)
+                    let (next_name, next_args) = match next_cmd {
+                        Command::SimpleCommand(c, a) => (c, a),
+                        _ => unreachable!(),
+                    };
+
+                    let next_path = match find_executable_in_path(next_name) {
+                        Some(p) => p,
+                        None => {
+                            eprintln!("{}: command not found", next_name);
+                            return;
+                        }
+                    };
+
+                    let next_is_last = (i + 1) == commands.len() - 1;
+                    let next_stdout = if next_is_last { Stdio::inherit() } else { Stdio::piped() };
+
+                    match prepare_unix_command(&next_path, next_name, next_args)
+                        .stdin(Stdio::piped()) // We will write to this
+                        .stdout(next_stdout)
+                        .spawn()
+                    {
+                        Ok(mut child) => {
+                            // Run current builtin writing to child.stdin in a separate thread
+                            // to avoid deadlock if the child produces output that fills the pipe
+                            // before we can read it (in the next iteration).
+                            if let Some(mut child_stdin) = child.stdin.take() {
+                                let cmd_name_owned = cmd_name.clone();
+                                let args_owned = args.clone();
+                                thread::spawn(move || {
+                                    let mut stderr = std::io::stderr();
+                                    let _ = builtins::run_builtin(&cmd_name_owned, &args_owned, &mut child_stdin, &mut stderr);
+                                });
+                            }
+
+                            // Update input_source for i+2
+                            if !next_is_last {
+                                input_source = Stdio::from(child.stdout.take().unwrap());
+                            } else {
+                                input_source = Stdio::inherit();
+                            }
+
+                            children.push(child);
+                        },
+                        Err(e) => {
+                            eprintln!("Failed to start {}: {}", next_name, e);
+                            return;
+                        }
+                    }
+
+                    // We handled i and i+1
+                    i += 2;
+                }
             }
         }
+    }
 
-        let mut stdout = std::io::stdout();
-        let mut stderr = std::io::stderr();
-        let _ = builtins::run_builtin(right_cmd, right_args, &mut stdout, &mut stderr);
-
-        if let Some(mut child) = left_child {
-            let _ = child.wait();
-        }
-    } else {
-        // Left is builtin, Right is external
-        let right_path = match find_executable_in_path(right_cmd) {
-            Some(path) => path,
-            None => {
-                eprintln!("{}: command not found", right_cmd);
-                return;
-            }
-        };
-
-        let mut right_child = match prepare_unix_command(&right_path, right_cmd, right_args)
-            .stdin(Stdio::piped())
-            .spawn()
-        {
-            Ok(child) => child,
-            Err(e) => {
-                eprintln!("Failed to start {}: {}", right_cmd, e);
-                return;
-            }
-        };
-
-        if let Some(mut right_stdin) = right_child.stdin.take() {
-            let mut stderr = std::io::stderr();
-            let _ = builtins::run_builtin(left_cmd, left_args, &mut right_stdin, &mut stderr);
-        }
-
-        let _ = right_child.wait();
+    for mut child in children {
+        let _ = child.wait();
     }
 }
