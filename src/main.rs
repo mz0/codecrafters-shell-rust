@@ -28,7 +28,10 @@ fn main() {
 
                         let mut stdout = io::stdout();
                         let mut stderr = io::stderr();
-                        if builtins::all().contains(&&*cmd) {
+                        if cmd == builtins::CMD_HISTORY {
+                            _ = builtins::run_builtin(&*cmd, &args, &mut stdout, &mut stderr);
+                            // TODO cmd == "history -r .." -> update rustyline history
+                        } else if builtins::all().contains(&&*cmd) {
                             _ = builtins::run_builtin(&*cmd, &args, &mut stdout, &mut stderr);
                         } else if let Some(exec_path) = find_executable_in_path(&cmd) {
                             _ = external::run_unix(exec_path, &cmd, &args);

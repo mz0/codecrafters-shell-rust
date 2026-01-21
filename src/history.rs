@@ -73,7 +73,7 @@ pub fn write_to_file(path: &Path) -> std::io::Result<()> {
 }
 
 /// Reads history from a file, appending to the current history.
-pub fn read_from_file(path: &Path) -> std::io::Result<()> {
+pub fn read_from_file(path: &Path) -> std::io::Result<usize> {
     let file = File::open(path)?;
     let reader = BufReader::new(file);
     let history_mutex = HISTORY.get_or_init(|| Mutex::new(History { commands: Vec::new(), unsaved_idx: 0 }));
@@ -83,14 +83,16 @@ pub fn read_from_file(path: &Path) -> std::io::Result<()> {
     // we treat the loaded commands as saved as well.
     let was_fully_saved = history.unsaved_idx == history.commands.len();
 
+    let mut count = 0;
     for line in reader.lines() {
         add_internal(&mut history, &line?);
+        count += 1;
     }
 
     if was_fully_saved {
         history.unsaved_idx = history.commands.len();
     }
-    Ok(())
+    Ok(count)
 }
 
 /// Appends the current history to a file.
