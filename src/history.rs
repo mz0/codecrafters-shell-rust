@@ -111,3 +111,11 @@ pub fn append_to_file(path: &Path) -> std::io::Result<()> {
     history.unsaved_idx = history.commands.len();
     Ok(())
 }
+
+/// Returns the last `n` commands from the history.
+pub fn get_recent(n: usize) -> Vec<String> {
+    let history_mutex = HISTORY.get_or_init(|| Mutex::new(History { commands: Vec::new(), unsaved_idx: 0 }));
+    let history = history_mutex.lock().unwrap();
+    let start_index = history.commands.len().saturating_sub(n);
+    history.commands[start_index..].to_vec()
+}
