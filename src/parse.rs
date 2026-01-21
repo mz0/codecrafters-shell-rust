@@ -69,8 +69,12 @@ fn split_by_pipe(s: &str) -> Result<Vec<String>, String> {
 
         match c {
             '\\' => {
-                escaped = true;
-                current_part.push(c);
+                if in_single_quote {
+                    current_part.push(c);
+                } else {
+                    escaped = true;
+                    current_part.push(c);
+                }
             }
             '\'' => {
                 if !in_double_quote {
@@ -307,5 +311,24 @@ mod tests {
             Command::InvalidCommand(msg) => assert_eq!(msg, "Empty command"),
             _ => panic!("Expected InvalidCommand"),
         }
+    }
+
+    #[test]
+    fn test_single_quotes() {
+        let input = "echo 'example\\\"test'";  // echo 'example\"test'
+        let expect = Command::SimpleCommand("echo".to_string(), vec!["example\\\"test".to_string()]);
+        assert_eq!(parse(input), expect);
+    }
+
+    #[test]
+    fn test_single_quotes3() {
+        // cat /tmp/ant/'no slash 63' /tmp/ant/'one slash \89' /tmp/ant/'two slashes \92\'
+        let input = "cat /tmp/ant/'no slash 63' /tmp/ant/'one slash \\89' /tmp/ant/'two slashes \\92\\'";
+        let expect = Command::SimpleCommand("cat".to_string(), vec![
+            "/tmp/ant/no slash 63".to_string(),
+            "/tmp/ant/one slash \\89".to_string(),
+            "/tmp/ant/two slashes \\92\\".to_string(),
+        ]);
+        assert_eq!(parse(input), expect);
     }
 }
