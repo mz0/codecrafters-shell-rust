@@ -1,155 +1,121 @@
-use std::process::{Stdio, Child};
-use std::thread;
+use std::{fs, path::PathBuf};
 
-use crate::executables::find_executable_in_path;
-use crate::parse::Command;
-use crate::builtins;
-use crate::external::prepare_unix_command;
+use anyhow::{anyhow, Result};
+use os_pipe::pipe;
 
-pub fn run_pipeline(commands: &[Command]) {
-    if commands.is_empty() {
-        return;
+use crate::command::Command;
+use crate::history::History;
+use crate::token::{tokenize, RedirectType, Token};
+
+pub struct Pipeline {
+    commands: Vec<Command>,
+    history: History,
+}
+
+impl Pipeline {
+    pub fn new(input: &str, history: History) -> Result<Self> {
+        let mut pipeline = Self {
+            commands: Vec::new(),
+            history,
+        };
+        let tokens = tokenize(input)?;
+        pipeline.parse_tokens(tokens)?;
+        Ok(pipeline)
     }
 
-    let mut children: Vec<Child> = Vec::new();
-    let mut input_source: Stdio = Stdio::inherit();
-    let mut i = 0;
-
-    while i < commands.len() {
-        let cmd = &commands[i];
-        let is_last = i == commands.len() - 1;
-        let is_builtin = match cmd {
-            Command::SimpleCommand(c, _) => builtins::all().contains(&c.as_str()),
-            _ => false,
-        };
-
-        if !is_builtin {
-            // External
-            let (cmd_name, args) = match cmd {
-                Command::SimpleCommand(c, a) => (c, a),
-                _ => unreachable!(),
-            };
-
-            let path = match find_executable_in_path(cmd_name) {
-                Some(p) => p,
-                None => {
-                    eprintln!("{}: command not found", cmd_name);
-                    return;
-                }
-            };
-
-            let stdout_target = if is_last { Stdio::inherit() } else { Stdio::piped() };
-
-            match prepare_unix_command(&path, cmd_name, args)
-                .stdin(input_source)
-                .stdout(stdout_target)
-                .spawn()
-            {
-                Ok(mut child) => {
-                    if !is_last {
-                        input_source = Stdio::from(child.stdout.take().unwrap());
-                    } else {
-                        input_source = Stdio::inherit();
+    fn parse_tokens(&mut self, tokens: Vec<Token>) -> Result<()> {
+        let mut cmd = Command::new(self.history.clone());
+        for token in tokens {
+            match token {
+                Token::Arg(arg) => cmd.push_arg(&arg),
+                Token::Pipe => {
+                    if cmd.is_empty() {
+                        return Err(anyhow!("Empty command before pipe"));
                     }
-                    children.push(child);
-                },
-                Err(e) => {
-                    eprintln!("Failed to start {}: {}", cmd_name, e);
-                    return;
+                    self.commands.push(cmd);
+                    cmd = Command::new(self.history.clone());
                 }
-            }
-            i += 1;
-        } else {
-            // Builtin
-            // Builtins ignore stdin, so we close the previous pipe if any.
-            input_source = Stdio::inherit();
-
-            let (cmd_name, args) = match cmd {
-                Command::SimpleCommand(c, a) => (c, a),
-                _ => unreachable!(),
-            };
-
-            if is_last {
-                let mut stdout = std::io::stdout();
-                let mut stderr = std::io::stderr();
-                let _ = builtins::run_builtin(cmd_name, args, &mut stdout, &mut stderr);
-                i += 1;
-            } else {
-                // Look ahead
-                let next_cmd = &commands[i+1];
-                let next_is_builtin = match next_cmd {
-                    Command::SimpleCommand(c, _) => builtins::all().contains(&c.as_str()),
-                    _ => false,
-                };
-
-                if next_is_builtin {
-                    // Builtin | Builtin
-                    // Run current to sink
-                    let mut sink = std::io::sink();
-                    let mut stderr = std::io::stderr();
-                    let _ = builtins::run_builtin(cmd_name, args, &mut sink, &mut stderr);
-
-                    i += 1;
-                } else {
-                    // Builtin | External
-                    // Spawn External (next_cmd)
-                    let (next_name, next_args) = match next_cmd {
-                        Command::SimpleCommand(c, a) => (c, a),
-                        _ => unreachable!(),
-                    };
-
-                    let next_path = match find_executable_in_path(next_name) {
-                        Some(p) => p,
-                        None => {
-                            eprintln!("{}: command not found", next_name);
-                            return;
-                        }
-                    };
-
-                    let next_is_last = (i + 1) == commands.len() - 1;
-                    let next_stdout = if next_is_last { Stdio::inherit() } else { Stdio::piped() };
-
-                    match prepare_unix_command(&next_path, next_name, next_args)
-                        .stdin(Stdio::piped()) // We will write to this
-                        .stdout(next_stdout)
-                        .spawn()
-                    {
-                        Ok(mut child) => {
-                            // Run current builtin writing to child.stdin in a separate thread
-                            // to avoid deadlock if the child produces output that fills the pipe
-                            // before we can read it (in the next iteration).
-                            if let Some(mut child_stdin) = child.stdin.take() {
-                                let cmd_name_owned = cmd_name.clone();
-                                let args_owned = args.clone();
-                                thread::spawn(move || {
-                                    let mut stderr = std::io::stderr();
-                                    let _ = builtins::run_builtin(&cmd_name_owned, &args_owned, &mut child_stdin, &mut stderr);
-                                });
-                            }
-
-                            // Update input_source for i+2
-                            if !next_is_last {
-                                input_source = Stdio::from(child.stdout.take().unwrap());
-                            } else {
-                                input_source = Stdio::inherit();
-                            }
-
-                            children.push(child);
-                        },
-                        Err(e) => {
-                            eprintln!("Failed to start {}: {}", next_name, e);
-                            return;
+                Token::Redirect {
+                    type_,
+                    path,
+                    append,
+                } => {
+                    let redirect_file = create_file(&path, append)?;
+                    match type_ {
+                        RedirectType::Stdout => cmd.set_output(redirect_file),
+                        RedirectType::Stderr => cmd.set_err(redirect_file),
+                        RedirectType::Both => {
+                            let err = redirect_file.try_clone()?;
+                            cmd.set_output(redirect_file);
+                            cmd.set_err(err);
                         }
                     }
-
-                    // We handled i and i+1
-                    i += 2;
                 }
             }
         }
+        if !cmd.is_empty() {
+            self.commands.push(cmd);
+        }
+        Ok(())
     }
 
-    for mut child in children {
-        let _ = child.wait();
+    pub fn execute(&mut self) -> Result<()> {
+        if self.commands.is_empty() {
+            return Ok(());
+        }
+        if self.commands.len() == 1 {
+            return self.commands[0].execute();
+        }
+
+        let last_idx = self.commands.len() - 1;
+        let mut children = Vec::new();
+        let mut prev_pipe = None;
+
+        for (i, cmd) in self.commands.iter_mut().enumerate() {
+            let is_last = i == last_idx;
+            // Prepare a pipe for this stage if not last
+            let (next_reader, next_writer) = if !is_last {
+                let (r, w) = pipe()?;
+                (Some(r), Some(w))
+            } else {
+                (None, None)
+            };
+            if cmd.is_builtin() {
+                // Builtin: execute directly, redirect stdout if needed
+                if let Some(out) = next_writer {
+                    // temporarily swap output to pipe
+                    cmd.execute_to_output(out)?;
+                } else {
+                    // last builtin
+                    cmd.execute()?;
+                }
+            } else {
+                // External: spawn child process
+                let mut p = cmd.new_process();
+                if let Some(reader) = prev_pipe.take() {
+                    p.stdin(reader);
+                }
+                if let Some(out) = next_writer {
+                    p.stdout(out);
+                }
+                children.push(p.spawn()?);
+            }
+            prev_pipe = next_reader;
+        }
+
+        for mut child in children {
+            child.wait()?;
+        }
+
+        Ok(())
     }
+}
+
+fn create_file(path: &PathBuf, append: bool) -> Result<fs::File> {
+    let mut opts = fs::OpenOptions::new();
+    opts.write(true)
+        .create(true)
+        .truncate(!append)
+        .append(append);
+    Ok(opts.open(path)?)
 }
