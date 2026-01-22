@@ -5,12 +5,18 @@ This is a w.i.p. Rust solutions to the
 ## `codecrafters` CLI
 
 [Install `codecrafters` CLI](https://docs.codecrafters.io/cli/installation#how-do-i-install-the-cli)
-and use it to check your progress:
+and [use it to check your progress](https://docs.codecrafters.io/cli/usage):
 ```
 # ...edit files, then
 $ git add src/ Cargo.toml Cargo.lock
-$ codecrafters test
+$ codecrafters test  # OR codecrafters test --previous
 # ...TODO output sample...#
+```
+**NB** `install.sh` asks `sudo` permissions for installing into `/usr/local/bin/`.
+Examine the script if unsure about it (and modify if you can):
+```shell
+curl -fsSLo cccli-install.sh https://codecrafters.io/install.sh
+# cccli-install.sh: 91 lines - 2322 Bytes - 2026-01-22
 ```
 
 **Note**: If you're viewing this repo on GitHub, head over to
