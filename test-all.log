@@ -1,0 +1,849 @@
+$ codecrafters test --previous
+Initiating test run...
+
+⏳ Turbo test runners busy. You are in queue.
+
+Upgrade to skip the wait: https://codecrafters.io/turbo
+
+Running tests on your code. Logs should appear shortly...
+
+Detected changes to Cargo.toml. Re-building... (this might take a while)
+
+[build] Starting build...
+[build] If you don't see logs for 60s+, please contact us at hello@codecrafters.io
+[build] Step 1 complete.
+[build] Step 2 complete.
+[build] Step 3 complete.
+[build] Step 4 complete.
+[build] Step 5 complete.
+[build] Step 6 complete.
+[build] Step 7 complete.
+[build] Step 8 complete.
+[build] Step 9 complete.
+[build] Step 10 complete.
+[build] Step 11 complete.
+[build] Step 10 complete.
+[build] Step 12 complete.
+[build] Step 13 complete.
+[build] Step 14 complete.
+[build] >     Updating crates.io index
+[build] >  Downloading crates ...
+[build] >   Downloaded thiserror v1.0.69
+[build] >   Downloaded quote v1.0.43
+[build] >   Downloaded thiserror-impl v1.0.69
+[build] >   Downloaded strum_macros v0.27.2
+[build] >   Downloaded unicode-ident v1.0.22
+[build] >   Downloaded proc-macro2 v1.0.106
+[build] >   Downloaded termion v4.0.6
+[build] >   Downloaded numtoa v0.2.4
+[build] >   Downloaded anyhow v1.0.100
+[build] >   Downloaded strum v0.27.2
+[build] >   Downloaded os_pipe v1.2.3
+[build] >   Downloaded is_executable v1.0.5
+[build] >   Downloaded heck v0.5.0
+[build] >   Downloaded bytes v1.11.0
+[build] >   Downloaded libc v0.2.180
+[build] >   Downloaded syn v2.0.114
+[build] >    Compiling proc-macro2 v1.0.106
+[build] >    Compiling unicode-ident v1.0.22
+[build] >    Compiling quote v1.0.43
+[build] >    Compiling libc v0.2.180
+[build] >    Compiling thiserror v1.0.69
+[build] >    Compiling heck v0.5.0
+[build] >    Compiling anyhow v1.0.100
+[build] >    Compiling numtoa v0.2.4
+[build] >    Compiling bytes v1.11.0
+[build] >    Compiling is_executable v1.0.5
+[build] >    Compiling syn v2.0.114
+[build] >    Compiling os_pipe v1.2.3
+[build] >    Compiling termion v4.0.6
+[build] >    Compiling thiserror-impl v1.0.69
+[build] >    Compiling strum_macros v0.27.2
+[build] >    Compiling strum v0.27.2
+[build] >    Compiling codecrafters-shell v0.1.0 (/app)
+[build] >     Finished `release` profile [optimized] target(s) in 3.49s
+[build] Step 15 complete.
+[build] Step 16 complete.
+[build] Step 17 complete.
+[build] Step 18 complete.
+[build] Step 19 complete.
+[build] Build successful.
+
+[compile]    Compiling codecrafters-shell v0.1.0 (/app)
+[compile]     Finished `release` profile [optimized] target(s) in 2.40s
+[compile] Moved ./.codecrafters/run.sh → ./your_program.sh
+[compile] Compilation successful.
+
+[tester::#OO8] Running tests for Stage #OO8 (Print a prompt)
+[tester::#OO8] Running ./your_program.sh
+[your-program] $ 
+[tester::#OO8] ✓ Received prompt
+[tester::#OO8] Test passed.
+
+[tester::#CZ2] Running tests for Stage #CZ2 (Handle invalid commands)
+[tester::#CZ2] Running ./your_program.sh
+[your-program] $ invalid_grape_command
+[your-program] invalid_grape_command: command not found
+[tester::#CZ2] ✓ Received command not found message
+[tester::#CZ2] Test passed.
+
+[tester::#FF0] Running tests for Stage #FF0 (Implement a REPL)
+[tester::#FF0] Running ./your_program.sh
+[your-program] $ invalid_command_1
+[your-program] invalid_command_1: command not found
+[tester::#FF0] ✓ Received command not found message
+[your-program] $ invalid_command_2
+[your-program] invalid_command_2: command not found
+[tester::#FF0] ✓ Received command not found message
+[your-program] $ invalid_command_3
+[your-program] invalid_command_3: command not found
+[tester::#FF0] ✓ Received command not found message
+[your-program] $ invalid_command_4
+[your-program] invalid_command_4: command not found
+[tester::#FF0] ✓ Received command not found message
+[your-program] $ 
+[tester::#FF0] Test passed.
+
+[tester::#PN5] Running tests for Stage #PN5 (Implement exit)
+[tester::#PN5] Running ./your_program.sh
+[your-program] $ invalid_grape_command
+[your-program] invalid_grape_command: command not found
+[tester::#PN5] ✓ Received command not found message
+[your-program] $ exit
+[tester::#PN5] ✓ Program exited successfully
+[tester::#PN5] ✓ No output after exit command
+[tester::#PN5] Test passed.
+
+[tester::#IZ3] Running tests for Stage #IZ3 (Implement echo)
+[tester::#IZ3] Running ./your_program.sh
+[your-program] $ echo blueberry apple
+[your-program] blueberry apple
+[tester::#IZ3] ✓ Received expected response
+[your-program] $ echo blueberry grape
+[your-program] blueberry grape
+[tester::#IZ3] ✓ Received expected response
+[your-program] $ 
+[tester::#IZ3] Test passed.
+
+[tester::#EZ5] Running tests for Stage #EZ5 (Implement type)
+[tester::#EZ5] Running ./your_program.sh
+[your-program] $ type echo
+[your-program] echo is a shell builtin
+[tester::#EZ5] ✓ Received expected response
+[your-program] $ type exit
+[your-program] exit is a shell builtin
+[tester::#EZ5] ✓ Received expected response
+[your-program] $ type type
+[your-program] type is a shell builtin
+[tester::#EZ5] ✓ Received expected response
+[your-program] $ type invalid_mango_command
+[your-program] invalid_mango_command: not found
+[tester::#EZ5] ✓ Received expected response
+[your-program] $ type invalid_orange_command
+[your-program] invalid_orange_command: not found
+[tester::#EZ5] ✓ Received expected response
+[your-program] $ 
+[tester::#EZ5] Test passed.
+
+[tester::#MG5] Running tests for Stage #MG5 (Locate executable files)
+[tester::#MG5] [setup] export PATH=/tmp/ant:$PATH
+[tester::#MG5] [setup] export PATH=/tmp/rat:$PATH
+[tester::#MG5] [setup] export PATH=/tmp/owl:$PATH
+[tester::#MG5] [setup] PATH is now: /tmp/owl:/tmp/rat:/tmp/ant:...
+[tester::#MG5] [setup] Available executables:
+[tester::#MG5] [setup] - my_exe
+[tester::#MG5] Running ./your_program.sh
+[your-program] $ type cat
+[your-program] cat is /usr/bin/cat
+[tester::#MG5] ✓ Received expected response
+[your-program] $ type cp
+[your-program] cp is /usr/bin/cp
+[tester::#MG5] ✓ Received expected response
+[your-program] $ type mkdir
+[your-program] mkdir is /usr/bin/mkdir
+[tester::#MG5] ✓ Received expected response
+[your-program] $ type my_exe
+[your-program] my_exe is /tmp/rat/my_exe
+[tester::#MG5] ✓ Received expected response
+[your-program] $ type invalid_orange_command
+[your-program] invalid_orange_command: not found
+[tester::#MG5] ✓ Received expected response
+[your-program] $ type invalid_mango_command
+[your-program] invalid_mango_command: not found
+[tester::#MG5] ✓ Received expected response
+[your-program] $ 
+[tester::#MG5] Test passed.
+
+[tester::#IP1] Running tests for Stage #IP1 (Run a program)
+[tester::#IP1] [setup] export PATH=/tmp/pig:$PATH
+[tester::#IP1] [setup] Available executables:
+[tester::#IP1] [setup] - custom_exe_3780
+[tester::#IP1] [setup] - custom_exe_1868
+[tester::#IP1] Running ./your_program.sh
+[your-program] $ custom_exe_3780 James Alice Maria
+[your-program] Program was passed 4 args (including program name).
+[your-program] Arg #0 (program name): custom_exe_3780
+[your-program] Arg #1: James
+[your-program] Arg #2: Alice
+[your-program] Arg #3: Maria
+[your-program] Program Signature: 3132892717
+[tester::#IP1] ✓ Received expected response
+[your-program] $ custom_exe_1868 Alice Maria
+[your-program] Program was passed 3 args (including program name).
+[your-program] Arg #0 (program name): custom_exe_1868
+[your-program] Arg #1: Alice
+[your-program] Arg #2: Maria
+[your-program] Program Signature: 7238202041
+[tester::#IP1] ✓ Received expected response
+[your-program] $ 
+[tester::#IP1] Test passed.
+
+[tester::#EI0] Running tests for Stage #EI0 (Navigation - The pwd builtin)
+[tester::#EI0] Running ./your_program.sh
+[your-program] $ type pwd
+[your-program] pwd is a shell builtin
+[tester::#EI0] ✓ Received expected response
+[your-program] $ pwd
+[your-program] /app
+[tester::#EI0] ✓ Received current working directory response
+[your-program] $ 
+[tester::#EI0] Test passed.
+
+[tester::#RA6] Running tests for Stage #RA6 (Navigation - The cd builtin: Absolute paths)
+[tester::#RA6] Running ./your_program.sh
+[your-program] $ cd /tmp/mango/banana/raspberry
+[your-program] $ pwd
+[your-program] /tmp/mango/banana/raspberry
+[tester::#RA6] Received current working directory response
+[your-program] $ cd /non-existing-directory
+[your-program] cd: /non-existing-directory: No such file or directory
+[tester::#RA6] ✓ Received error message
+[your-program] $ 
+[tester::#RA6] Test passed.
+
+[tester::#GQ9] Running tests for Stage #GQ9 (Navigation - The cd builtin: Relative paths)
+[tester::#GQ9] Running ./your_program.sh
+[your-program] $ cd /tmp/pear
+[your-program] $ pwd
+[your-program] /tmp/pear
+[tester::#GQ9] Received current working directory response
+[your-program] $ cd ./pear/grape
+[your-program] $ pwd
+[your-program] /tmp/pear/pear/grape
+[tester::#GQ9] Received current working directory response
+[your-program] $ cd ../../../
+[your-program] $ pwd
+[your-program] /tmp
+[tester::#GQ9] Received current working directory response
+[your-program] $ 
+[tester::#GQ9] Test passed.
+
+[tester::#GP4] Running tests for Stage #GP4 (Navigation - The cd builtin: Home directory)
+[tester::#GP4] Running ./your_program.sh
+[your-program] $ cd /tmp/banana/blueberry/apple
+[your-program] $ pwd
+[your-program] /tmp/banana/blueberry/apple
+[tester::#GP4] Received current working directory response
+[your-program] $ cd ~
+[your-program] $ pwd
+[your-program] /tmp/orange/apple/mango
+[tester::#GP4] Received current working directory response
+[your-program] $ 
+[tester::#GP4] Test passed.
+
+[tester::#QP2] Running tests for Stage #QP2 (Autocompletion - Builtin completion)
+[tester::#QP2] Running ./your_program.sh
+[tester::#QP2] ✓ Received prompt ($ )
+[tester::#QP2] Typed "ech"
+[tester::#QP2] ✓ Prompt line matches "$ ech"
+[tester::#QP2] Pressed "<TAB>" (expecting autocomplete to "echo")
+[tester::#QP2] ✓ Prompt line matches "echo"
+[your-program] $ echo 
+[tester::#QP2] Tearing down shell
+[tester::#QP2] Running ./your_program.sh
+[tester::#QP2] ✓ Received prompt ($ )
+[tester::#QP2] Typed "exi"
+[tester::#QP2] ✓ Prompt line matches "$ exi"
+[tester::#QP2] Pressed "<TAB>" (expecting autocomplete to "exit")
+[tester::#QP2] ✓ Prompt line matches "exit"
+[your-program] $ exit 
+[tester::#QP2] Tearing down shell
+[tester::#QP2] Test passed.
+
+[tester::#GM9] Running tests for Stage #GM9 (Autocompletion - Completion with arguments)
+[tester::#GM9] Running ./your_program.sh
+[tester::#GM9] ✓ Received prompt ($ )
+[tester::#GM9] Typed "ech"
+[tester::#GM9] ✓ Prompt line matches "$ ech"
+[tester::#GM9] Pressed "<TAB>" (expecting autocomplete to "echo")
+[tester::#GM9] ✓ Prompt line matches "echo"
+[tester::#GM9] Typed "hello"
+[tester::#GM9] Pressed "<ENTER>"
+[your-program] $ echo hello
+[your-program] hello
+[tester::#GM9] ✓ Received "hello"
+[your-program] $ 
+[tester::#GM9] Tearing down shell
+[tester::#GM9] Running ./your_program.sh
+[tester::#GM9] ✓ Received prompt ($ )
+[tester::#GM9] Typed "ech"
+[tester::#GM9] ✓ Prompt line matches "$ ech"
+[tester::#GM9] Pressed "<TAB>" (expecting autocomplete to "echo")
+[tester::#GM9] ✓ Prompt line matches "echo"
+[tester::#GM9] Typed "foo bar"
+[tester::#GM9] Pressed "<ENTER>"
+[your-program] $ echo foo bar
+[your-program] foo bar
+[tester::#GM9] ✓ Received "foo bar"
+[your-program] $ 
+[tester::#GM9] Tearing down shell
+[tester::#GM9] Test passed.
+
+[tester::#QM8] Running tests for Stage #QM8 (Autocompletion - Missing completions)
+[tester::#QM8] Running ./your_program.sh
+[tester::#QM8] ✓ Received prompt ($ )
+[tester::#QM8] Typed "xyz"
+[tester::#QM8] ✓ Prompt line matches "$ xyz"
+[tester::#QM8] Pressed "<TAB>" (expecting autocomplete to "xyz")
+[tester::#QM8] ✓ Prompt line matches "xyz"
+[tester::#QM8] ✓ Received bell
+[your-program] $ xyz
+[tester::#QM8] Test passed.
+
+[tester::#GY5] Running tests for Stage #GY5 (Autocompletion - Executable completion)
+[tester::#GY5] [setup] export PATH=/tmp/cow:$PATH
+[tester::#GY5] [setup] Available executables:
+[tester::#GY5] [setup] - custom_exe_3109
+[tester::#GY5] Running ./your_program.sh
+[tester::#GY5] ✓ Received prompt ($ )
+[tester::#GY5] Typed "custom"
+[tester::#GY5] ✓ Prompt line matches "$ custom"
+[tester::#GY5] Pressed "<TAB>" (expecting autocomplete to "custom_exe_3109")
+[tester::#GY5] ✓ Prompt line matches "custom_exe_3109"
+[your-program] $ custom_exe_3109 
+[tester::#GY5] Test passed.
+
+[tester::#WH6] Running tests for Stage #WH6 (Autocompletion - Multiple completions)
+[tester::#WH6] [setup] export PATH=/tmp/ant:$PATH
+[tester::#WH6] [setup] export PATH=/tmp/dog:$PATH
+[tester::#WH6] [setup] export PATH=/tmp/pig:$PATH
+[tester::#WH6] [setup] Available executables:
+[tester::#WH6] [setup] - xyz_dog
+[tester::#WH6] [setup] - xyz_cow
+[tester::#WH6] [setup] - xyz_fox
+[tester::#WH6] Running ./your_program.sh
+[tester::#WH6] ✓ Received prompt ($ )
+[tester::#WH6] Typed "xyz_"
+[your-program] $ xyz_
+[tester::#WH6] ✓ Prompt line matches "$ xyz_"
+[tester::#WH6] Pressed "<TAB>" (expecting bell to ring)
+[tester::#WH6] ✓ Received bell
+[tester::#WH6] Pressed "<TAB>" (expecting autocomplete to "xyz_cow  xyz_dog  xyz_fox")
+[your-program] xyz_cow  xyz_dog  xyz_fox
+[tester::#WH6] ✓ Prompt line matches "xyz_cow  xyz_dog  xyz_fox"
+[tester::#WH6] Received completion for "xyz_"
+[your-program] $ xyz_
+[tester::#WH6] Test passed.
+
+[tester::#WT6] Running tests for Stage #WT6 (Autocompletion - Partial completions)
+[tester::#WT6] [setup] export PATH=/tmp/pig:$PATH
+[tester::#WT6] [setup] export PATH=/tmp/dog:$PATH
+[tester::#WT6] [setup] export PATH=/tmp/ant:$PATH
+[tester::#WT6] [setup] Available executables:
+[tester::#WT6] [setup] - xyz_ant
+[tester::#WT6] [setup] - xyz_ant_fox
+[tester::#WT6] [setup] - xyz_ant_fox_dog
+[tester::#WT6] Running ./your_program.sh
+[tester::#WT6] ✓ Received prompt ($ )
+[tester::#WT6] Typed "xyz_"
+[tester::#WT6] ✓ Prompt line matches "$ xyz_"
+[tester::#WT6] Pressed "<TAB>" (expecting autocomplete to "xyz_ant")
+[tester::#WT6] ✓ Prompt line matches "$ xyz_ant"
+[tester::#WT6] Typed "_"
+[tester::#WT6] ✓ Prompt line matches "$ xyz_ant_"
+[tester::#WT6] Pressed "<TAB>" (expecting autocomplete to "xyz_ant_fox")
+[tester::#WT6] ✓ Prompt line matches "$ xyz_ant_fox"
+[tester::#WT6] Typed "_"
+[tester::#WT6] ✓ Prompt line matches "$ xyz_ant_fox_"
+[tester::#WT6] Pressed "<TAB>" (expecting autocomplete to "xyz_ant_fox_dog")
+[tester::#WT6] ✓ Prompt line matches "$ xyz_ant_fox_dog "
+[tester::#WT6] Received all partial completions for "xyz_ant_fox_dog"
+[your-program] $ xyz_ant_fox_dog 
+[tester::#WT6] Test passed.
+
+[tester::#BR6] Running tests for Stage #BR6 (Pipelines - Dual-command pipeline)
+[tester::#BR6] [setup] export PATH=/tmp/raspberry/mango/blueberry:$PATH
+[tester::#BR6] Running ./your_program.sh
+[tester::#BR6] [setup] echo -e "grape pineapple\nraspberry orange\npear blueberry\nstrawberry apple\nbanana mango" > "/tmp/cow/file-45"
+[your-program] $ cat /tmp/cow/file-45 | wc
+[your-program]        5      10      78
+[tester::#BR6] ✓ Received expected response
+[tester::#BR6] [setup] echo -e "1. blueberry mango\n2. orange grape\n3. banana pear" > "/tmp/ant/file-12"
+[your-program] $ tail -f /tmp/ant/file-12 | head -n 5
+[your-program] 1. blueberry mango
+[your-program] 2. orange grape
+[your-program] 3. banana pear
+[tester::#BR6] ✓ Received redirected file content
+[your-program] 4. strawberry apple
+[tester::#BR6] ✓ Received appended line 4
+[your-program] 5. orange mango
+[tester::#BR6] ✓ Received appended line 5
+[tester::#BR6] Test passed.
+
+[tester::#NY9] Running tests for Stage #NY9 (Pipelines - Pipelines with built-ins)
+[tester::#NY9] [setup] export PATH=/tmp/apple/grape/orange:$PATH
+[tester::#NY9] Running ./your_program.sh
+[your-program] $ echo blueberry-mango | wc
+[your-program]        1       1      16
+[tester::#NY9] ✓ Received expected output
+[your-program] $ ls | type exit
+[your-program] exit is a shell builtin
+[tester::#NY9] ✓ Received expected output
+[your-program] $ 
+[tester::#NY9] Test passed.
+
+[tester::#XK3] Running tests for Stage #XK3 (Pipelines - Multi-command pipelines)
+[tester::#XK3] [setup] export PATH=/tmp/grape/pear/banana:$PATH
+[tester::#XK3] [setup] echo -e "orange\nstrawberry\npear\nraspberry\npineapple" > "/tmp/rat/file-41"
+[tester::#XK3] Running ./your_program.sh
+[your-program] $ cat /tmp/rat/file-41 | head -n 3 | wc
+[your-program]        3       3      23
+[tester::#XK3] ✓ Received expected output
+[tester::#XK3] [setup] echo -n "orange" > "/tmp/cow/f-8"
+[tester::#XK3] [setup] echo -n "mango" > "/tmp/cow/f-49"
+[tester::#XK3] [setup] echo -n "raspberry" > "/tmp/cow/f-44"
+[tester::#XK3] [setup] echo -n "banana" > "/tmp/cow/f-11"
+[tester::#XK3] [setup] echo -n "pineapple" > "/tmp/cow/f-45"
+[tester::#XK3] [setup] echo -n "blueberry" > "/tmp/cow/f-12"
+[your-program] $ ls /tmp/cow | tail -n 5 | head -n 3 | grep "f-44"
+[your-program] f-44
+[tester::#XK3] ✓ Received expected output
+[your-program] $ 
+[tester::#XK3] Test passed.
+
+[tester::#BQ4] Running tests for Stage #BQ4 (History - The history builtin)
+[tester::#BQ4] Running ./your_program.sh
+[your-program] $ type history
+[your-program] history is a shell builtin
+[tester::#BQ4] ✓ Received expected response
+[your-program] $ 
+[tester::#BQ4] Test passed.
+
+[tester::#YF5] Running tests for Stage #YF5 (History - Listing history)
+[tester::#YF5] Running ./your_program.sh
+[your-program] $ echo banana pineapple
+[your-program] banana pineapple
+[tester::#YF5] ✓ Command executed successfully
+[your-program] $ echo blueberry pear
+[your-program] blueberry pear
+[tester::#YF5] ✓ Command executed successfully
+[your-program] $ echo apple banana
+[your-program] apple banana
+[tester::#YF5] ✓ Command executed successfully
+[your-program] $ history
+[your-program]     1 echo banana pineapple
+[your-program]     2 echo blueberry pear
+[your-program]     3 echo apple banana
+[your-program]     4 history
+[tester::#YF5] ✓ Received expected response
+[your-program] $ 
+[tester::#YF5] Test passed.
+
+[tester::#AG6] Running tests for Stage #AG6 (History - Limiting history entries)
+[tester::#AG6] Running ./your_program.sh
+[your-program] $ echo pear raspberry
+[your-program] pear raspberry
+[tester::#AG6] ✓ Command executed successfully
+[your-program] $ echo banana grape
+[your-program] banana grape
+[tester::#AG6] ✓ Command executed successfully
+[your-program] $ echo strawberry orange
+[your-program] strawberry orange
+[tester::#AG6] ✓ Command executed successfully
+[your-program] $ history 2
+[your-program]     3 echo strawberry orange
+[your-program]     4 history 2
+[tester::#AG6] ✓ Received expected response
+[your-program] $ echo raspberry orange
+[your-program] raspberry orange
+[tester::#AG6] ✓ Command executed successfully
+[your-program] $ echo strawberry apple
+[your-program] strawberry apple
+[tester::#AG6] ✓ Command executed successfully
+[your-program] $ echo blueberry grape
+[your-program] blueberry grape
+[tester::#AG6] ✓ Command executed successfully
+[your-program] $ echo blueberry grape
+[your-program] blueberry grape
+[tester::#AG6] ✓ Command executed successfully
+[your-program] $ echo grape raspberry
+[your-program] grape raspberry
+[tester::#AG6] ✓ Command executed successfully
+[your-program] $ echo apple orange
+[your-program] apple orange
+[tester::#AG6] ✓ Command executed successfully
+[your-program] $ history 3
+[your-program]     8 echo grape raspberry
+[your-program]     9 echo apple orange
+[your-program]    10 history 3
+[tester::#AG6] ✓ Received expected response
+[your-program] $ 
+[tester::#AG6] Test passed.
+
+[tester::#RH7] Running tests for Stage #RH7 (History - Up-arrow navigation)
+[tester::#RH7] Running ./your_program.sh
+[your-program] $ echo orange banana
+[your-program] orange banana
+[tester::#RH7] ✓ Command executed successfully
+[your-program] $ echo grape raspberry
+[your-program] grape raspberry
+[tester::#RH7] ✓ Command executed successfully
+[your-program] $ invalid_apple_command
+[your-program] invalid_apple_command: command not found
+[tester::#RH7] ✓ Received command not found message
+[your-program] $ echo orange banana
+[your-program] orange banana
+[tester::#RH7] ✓ Command executed successfully
+[tester::#RH7] Pressed "<UP ARROW>" (expecting to recall "echo orange banana")
+[tester::#RH7] ✓ Prompt line matches "echo orange banana"
+[tester::#RH7] Pressed "<UP ARROW>" (expecting to recall "invalid_apple_command")
+[tester::#RH7] ✓ Prompt line matches "invalid_apple_command"
+[tester::#RH7] Pressed "<UP ARROW>" (expecting to recall "echo grape raspberry")
+[tester::#RH7] ✓ Prompt line matches "echo grape raspberry"
+[your-program] $ echo grape raspberry
+[tester::#RH7] Test passed.
+
+[tester::#VQ0] Running tests for Stage #VQ0 (History - Down-arrow navigation)
+[tester::#VQ0] Running ./your_program.sh
+[your-program] $ echo raspberry pear
+[your-program] raspberry pear
+[tester::#VQ0] ✓ Command executed successfully
+[your-program] $ echo pear banana
+[your-program] pear banana
+[tester::#VQ0] ✓ Command executed successfully
+[your-program] $ invalid_orange_command
+[your-program] invalid_orange_command: command not found
+[tester::#VQ0] ✓ Received command not found message
+[your-program] $ echo strawberry raspberry
+[your-program] strawberry raspberry
+[tester::#VQ0] ✓ Command executed successfully
+[tester::#VQ0] Pressed "<UP ARROW>" (expecting to recall "echo strawberry raspberry")
+[tester::#VQ0] ✓ Prompt line matches "echo strawberry raspberry"
+[tester::#VQ0] Pressed "<UP ARROW>" (expecting to recall "invalid_orange_command")
+[tester::#VQ0] ✓ Prompt line matches "invalid_orange_command"
+[tester::#VQ0] Pressed "<DOWN ARROW>" (expecting to recall "echo strawberry raspberry")
+[tester::#VQ0] ✓ Prompt line matches "echo strawberry raspberry"
+[your-program] $ echo strawberry raspberry
+[tester::#VQ0] Test passed.
+
+[tester::#DM2] Running tests for Stage #DM2 (History - Executing commands from history)
+[tester::#DM2] Running ./your_program.sh
+[your-program] $ echo strawberry blueberry
+[your-program] strawberry blueberry
+[tester::#DM2] ✓ Command executed successfully
+[your-program] $ echo pineapple blueberry
+[your-program] pineapple blueberry
+[tester::#DM2] ✓ Command executed successfully
+[your-program] $ invalid_blueberry_command
+[your-program] invalid_blueberry_command: command not found
+[tester::#DM2] ✓ Received command not found message
+[your-program] $ echo grape orange
+[your-program] grape orange
+[tester::#DM2] ✓ Command executed successfully
+[tester::#DM2] Pressed "<UP ARROW>" (expecting to recall "echo grape orange")
+[tester::#DM2] ✓ Prompt line matches "echo grape orange"
+[tester::#DM2] Pressed "<UP ARROW>" (expecting to recall "invalid_blueberry_command")
+[tester::#DM2] ✓ Prompt line matches "invalid_blueberry_command"
+[tester::#DM2] Pressed "<DOWN ARROW>" (expecting to recall "echo grape orange")
+[tester::#DM2] ✓ Prompt line matches "echo grape orange"
+[tester::#DM2] Executing command "echo grape orange"
+[your-program] $ echo grape orange
+[your-program] grape orange
+[tester::#DM2] ✓ Command executed with expected output
+[your-program] $ 
+[tester::#DM2] Test passed.
+
+[tester::#ZA2] Running tests for Stage #ZA2 (History Persistence - Read history from file)
+[tester::#ZA2] Running ./your_program.sh
+[tester::#ZA2] Writing contents to /tmp/pineapple.txt
+[tester::#ZA2] [/tmp/pineapple.txt] echo raspberry blueberry
+[tester::#ZA2] [/tmp/pineapple.txt] echo grape blueberry mango
+[tester::#ZA2] [/tmp/pineapple.txt] 
+[your-program] $ history -r /tmp/pineapple.txt
+[your-program] $ history
+[your-program]     1 history -r /tmp/pineapple.txt
+[your-program]     2 echo raspberry blueberry
+[your-program]     3 echo grape blueberry mango
+[your-program]     4 history
+[tester::#ZA2] ✓ History after loading file is correct
+[your-program] $ 
+[tester::#ZA2] Test passed.
+
+[tester::#IN3] Running tests for Stage #IN3 (History Persistence - Write history to file)
+[tester::#IN3] Running ./your_program.sh
+[your-program] $ echo apple strawberry
+[your-program] apple strawberry
+[tester::#IN3] ✓ Received expected response
+[your-program] $ echo blueberry pear
+[your-program] blueberry pear
+[tester::#IN3] ✓ Received expected response
+[your-program] $ echo apple blueberry
+[your-program] apple blueberry
+[tester::#IN3] ✓ Received expected response
+[tester::#IN3] Writing history to file using command: history -w /tmp/orange.txt
+[your-program] $ history -w /tmp/orange.txt
+[tester::#IN3] ✓ Found 4 commands in history file
+[your-program] $ 
+[tester::#IN3] Test passed.
+
+[tester::#SX3] Running tests for Stage #SX3 (History Persistence - Append history to file)
+[tester::#SX3] Original history file content:
+[tester::#SX3] [/tmp/apple.txt] echo grape blueberry apple
+[tester::#SX3] [/tmp/apple.txt] echo strawberry grape pineapple
+[tester::#SX3] [/tmp/apple.txt] echo strawberry raspberry banana
+[tester::#SX3] [/tmp/apple.txt] 
+[tester::#SX3] Running ./your_program.sh
+[your-program] $ echo apple strawberry banana
+[your-program] apple strawberry banana
+[tester::#SX3] ✓ Ran echo apple strawberry banana
+[your-program] $ echo apple mango raspberry
+[your-program] apple mango raspberry
+[tester::#SX3] ✓ Ran echo apple mango raspberry
+[your-program] $ echo apple mango banana
+[your-program] apple mango banana
+[tester::#SX3] ✓ Ran echo apple mango banana
+[your-program] $ history -a /tmp/apple.txt
+[tester::#SX3] ✓ Found 7 commands in history file
+[your-program] $ echo grape orange
+[your-program] grape orange
+[tester::#SX3] ✓ Ran echo grape orange
+[your-program] $ history -a /tmp/apple.txt
+[tester::#SX3] ✓ Found 9 commands in history file after running history -a command again
+[your-program] $ 
+[tester::#SX3] Test passed.
+
+[tester::#ZP4] Running tests for Stage #ZP4 (History Persistence - Read history on startup)
+[tester::#ZP4] Writing commands to /tmp/strawberry.txt
+[tester::#ZP4] [/tmp/strawberry.txt] echo orange raspberry pear
+[tester::#ZP4] [/tmp/strawberry.txt] echo raspberry banana
+[tester::#ZP4] [/tmp/strawberry.txt] echo strawberry orange
+[tester::#ZP4] [/tmp/strawberry.txt] echo strawberry pear mango
+[tester::#ZP4] [/tmp/strawberry.txt] 
+[tester::#ZP4] export HISTFILE=/tmp/strawberry.txt
+[tester::#ZP4] Running ./your_program.sh
+[your-program] $ history
+[your-program]     1 echo orange raspberry pear
+[your-program]     2 echo raspberry banana
+[your-program]     3 echo strawberry orange
+[your-program]     4 echo strawberry pear mango
+[your-program]     5 history
+[tester::#ZP4] ✓ History loaded from file is correct
+[your-program] $ 
+[tester::#ZP4] Test passed.
+
+[tester::#KZ7] Running tests for Stage #KZ7 (History Persistence - Write history on exit)
+[tester::#KZ7] export HISTFILE=/tmp/orange.txt
+[tester::#KZ7] Running ./your_program.sh
+[your-program] $ echo mango pineapple
+[your-program] mango pineapple
+[tester::#KZ7] ✓ Ran echo mango pineapple
+[your-program] $ echo pineapple strawberry apple
+[your-program] pineapple strawberry apple
+[tester::#KZ7] ✓ Ran echo pineapple strawberry apple
+[your-program] $ history
+[your-program]     1 echo mango pineapple
+[your-program]     2 echo pineapple strawberry apple
+[your-program]     3 history
+[tester::#KZ7] ✓ History before exiting is correct
+[your-program] $ exit
+[tester::#KZ7] ✓ Program exited successfully
+[tester::#KZ7] ✓ Found 4 commands in history file
+[tester::#KZ7] Test passed.
+
+[tester::#JV2] Running tests for Stage #JV2 (History Persistence - Append history on exit)
+[tester::#JV2] Original history file content:
+[tester::#JV2] [/tmp/orange.txt] echo pear grape
+[tester::#JV2] [/tmp/orange.txt] echo grape mango
+[tester::#JV2] [/tmp/orange.txt] echo grape pineapple
+[tester::#JV2] [/tmp/orange.txt] 
+[tester::#JV2] export HISTFILE=/tmp/orange.txt
+[tester::#JV2] Running ./your_program.sh
+[your-program] $ echo apple pear blueberry
+[your-program] apple pear blueberry
+[tester::#JV2] ✓ Ran echo apple pear blueberry
+[your-program] $ echo apple orange strawberry
+[your-program] apple orange strawberry
+[tester::#JV2] ✓ Ran echo apple orange strawberry
+[your-program] $ history
+[your-program]     1 echo pear grape
+[your-program]     2 echo grape mango
+[your-program]     3 echo grape pineapple
+[your-program]     4 echo apple pear blueberry
+[your-program]     5 echo apple orange strawberry
+[your-program]     6 history
+[tester::#JV2] ✓ History before exiting is correct
+[your-program] $ exit
+[tester::#JV2] ✓ Program exited successfully
+[tester::#JV2] ✓ Found 7 commands in history file
+[tester::#JV2] Test passed.
+
+[tester::#NI6] Running tests for Stage #NI6 (Quoting - Single quotes)
+[tester::#NI6] [setup] export PATH=/tmp/orange/blueberry/pear:$PATH
+[tester::#NI6] Running ./your_program.sh
+[tester::#NI6] [setup] echo -n "pineapple blueberry." > "/tmp/dog/f   93"
+[tester::#NI6] [setup] echo -n "blueberry orange." > "/tmp/dog/f   61"
+[tester::#NI6] [setup] echo "pineapple pear." > "/tmp/dog/f   28"
+[your-program] $ echo 'world shell'
+[your-program] world shell
+[tester::#NI6] ✓ Received expected response
+[your-program] $ echo shell     example
+[your-program] shell example
+[tester::#NI6] ✓ Received expected response
+[your-program] $ echo 'script     hello' 'example''world' shell''test
+[your-program] script     hello exampleworld shelltest
+[tester::#NI6] ✓ Received expected response
+[your-program] $ cat '/tmp/dog/f   93' '/tmp/dog/f   61' '/tmp/dog/f   28'
+[your-program] pineapple blueberry.blueberry orange.pineapple pear.
+[tester::#NI6] ✓ Received expected response
+[your-program] $ 
+[tester::#NI6] Test passed.
+
+[tester::#TG6] Running tests for Stage #TG6 (Quoting - Double quotes)
+[tester::#TG6] [setup] export PATH=/tmp/raspberry/pineapple/mango:$PATH
+[tester::#TG6] Running ./your_program.sh
+[your-program] $ echo "shell test"
+[your-program] shell test
+[tester::#TG6] ✓ Received expected response
+[your-program] $ echo "test  world"  "example""shell"
+[your-program] test  world exampleshell
+[tester::#TG6] ✓ Received expected response
+[your-program] $ echo "example"  "script's"  test""world
+[your-program] example script's testworld
+[tester::#TG6] ✓ Received expected response
+[tester::#TG6] [setup] echo -n "strawberry pear." > "/tmp/dog/f 53"
+[tester::#TG6] [setup] echo -n "grape orange." > "/tmp/dog/f   46"
+[tester::#TG6] [setup] echo "raspberry pineapple." > "/tmp/dog/f's1"
+[your-program] $ cat "/tmp/dog/f 53" "/tmp/dog/f   46" "/tmp/dog/f's1"
+[your-program] strawberry pear.grape orange.raspberry pineapple.
+[tester::#TG6] ✓ Received expected response
+[your-program] $ 
+[tester::#TG6] Test passed.
+
+[tester::#YT5] Running tests for Stage #YT5 (Quoting - Backslash outside quotes)
+[tester::#YT5] [setup] export PATH=/tmp/mango/pineapple/apple:$PATH
+[tester::#YT5] [setup] echo -n "blueberry strawberry." > "/tmp/cow/_ignored_98"
+[tester::#YT5] [setup] echo -n "pineapple grape." > "/tmp/cow/ignore_42"
+[tester::#YT5] [setup] echo "raspberry pear." > "/tmp/cow/just_one_\\_48"
+[tester::#YT5] Running ./your_program.sh
+[your-program] $ echo hello\ \ \ \ \ \ test
+[your-program] hello      test
+[tester::#YT5] ✓ Received expected response
+[your-program] $ echo \'\"test shell\"\'
+[your-program] '"test shell"'
+[tester::#YT5] ✓ Received expected response
+[your-program] $ echo shell\nworld
+[your-program] shellnworld
+[tester::#YT5] ✓ Received expected response
+[your-program] $ cat /tmp/cow/\_ignored_98 /tmp/cow/ignore_\42 /tmp/cow/just_one_\\_48
+[your-program] blueberry strawberry.pineapple grape.raspberry pear.
+[tester::#YT5] ✓ Received expected response
+[your-program] $ 
+[tester::#YT5] Test passed.
+
+[tester::#LE5] Running tests for Stage #LE5 (Quoting - Backslash within single quotes)
+[tester::#LE5] [setup] export PATH=/tmp/grape/mango/pineapple:$PATH
+[tester::#LE5] Running ./your_program.sh
+[tester::#LE5] [setup] echo -n "raspberry orange." > "/tmp/bee/no slash 5"
+[tester::#LE5] [setup] echo -n "orange pineapple." > "/tmp/bee/one slash \\67"
+[tester::#LE5] [setup] echo "apple banana." > "/tmp/bee/two slashes \\49\\"
+[your-program] $ echo 'world\\ntest'
+[your-program] world\\ntest
+[tester::#LE5] ✓ Received expected response
+[your-program] $ echo 'example\"helloscript\"world'
+[your-program] example\"helloscript\"world
+[tester::#LE5] ✓ Received expected response
+[your-program] $ echo 'script\\ntest'
+[your-program] script\\ntest
+[tester::#LE5] ✓ Received expected response
+[your-program] $ cat /tmp/bee/'no slash 5' /tmp/bee/'one slash \67' /tmp/bee/'two slashes \49\'
+[your-program] raspberry orange.orange pineapple.apple banana.
+[tester::#LE5] ✓ Received expected response
+[your-program] $ 
+[tester::#LE5] Test passed.
+
+[tester::#GU3] Running tests for Stage #GU3 (Quoting - Backslash within double quotes)
+[tester::#GU3] [setup] export PATH=/tmp/orange/pear/apple:$PATH
+[tester::#GU3] [setup] echo -n "mango grape." > "/tmp/pig/number 16"
+[tester::#GU3] [setup] echo -n "mango banana." > "/tmp/pig/doublequote \" 9"
+[tester::#GU3] [setup] echo "grape pear." > "/tmp/pig/backslash \\ 91"
+[tester::#GU3] Running ./your_program.sh
+[your-program] $ echo "hello'script'\\'example"
+[your-program] hello'script'\'example
+[tester::#GU3] ✓ Received expected response
+[your-program] $ echo "hello\"insidequotes"script\"
+[your-program] hello"insidequotesscript"
+[tester::#GU3] ✓ Received expected response
+[your-program] $ echo "mixed\"quote'test'\\"
+[your-program] mixed"quote'test'\
+[tester::#GU3] ✓ Received expected response
+[your-program] $ cat /tmp/pig/"number 16" /tmp/pig/"doublequote \" 9" /tmp/pig/"backslash \\ 91"
+[your-program] mango grape.mango banana.grape pear.
+[tester::#GU3] ✓ Received expected response
+[your-program] $ 
+[tester::#GU3] Test passed.
+
+[tester::#QJ0] Running tests for Stage #QJ0 (Quoting - Executing a quoted executable)
+[tester::#QJ0] [setup] export PATH=/tmp/fox:$PATH
+[tester::#QJ0] [setup] Available executables:
+[tester::#QJ0] [setup] - 'exe  with  space'
+[tester::#QJ0] [setup] - 'exe with "quotes"'
+[tester::#QJ0] [setup] - "exe with \'single quotes\'"
+[tester::#QJ0] [setup] - 'exe with \n newline'
+[tester::#QJ0] Running ./your_program.sh
+[tester::#QJ0] [setup] echo "grape pineapple." > "/tmp/fox/f1"
+[tester::#QJ0] [setup] echo "orange mango." > "/tmp/fox/f2"
+[tester::#QJ0] [setup] echo "strawberry blueberry." > "/tmp/fox/f3"
+[tester::#QJ0] [setup] echo "mango strawberry." > "/tmp/fox/f4"
+[your-program] $ 'exe  with  space' /tmp/fox/f1
+[your-program] grape pineapple.
+[tester::#QJ0] ✓ Received expected response
+[your-program] $ 'exe with "quotes"' /tmp/fox/f2
+[your-program] orange mango.
+[tester::#QJ0] ✓ Received expected response
+[your-program] $ "exe with \'single quotes\'" /tmp/fox/f3
+[your-program] strawberry blueberry.
+[tester::#QJ0] ✓ Received expected response
+[your-program] $ 'exe with \n newline' /tmp/fox/f4
+[your-program] mango strawberry.
+[tester::#QJ0] ✓ Received expected response
+[your-program] $ 
+[tester::#QJ0] Test passed.
+
+[tester::#JV1] Running tests for Stage #JV1 (Redirection - Redirect stdout)
+[tester::#JV1] [setup] export PATH=/tmp/mango/grape/grape:$PATH
+[tester::#JV1] Running ./your_program.sh
+[tester::#JV1] [setup] echo "blueberry" > "/tmp/pig/blueberry"
+[tester::#JV1] [setup] echo "orange" > "/tmp/pig/orange"
+[tester::#JV1] [setup] echo "strawberry" > "/tmp/pig/strawberry"
+[your-program] $ ls -1 /tmp/pig > /tmp/owl/ant.md
+[your-program] $ cat /tmp/owl/ant.md
+[your-program] blueberry
+[your-program] orange
+[your-program] strawberry
+[tester::#JV1] ✓ Received redirected file content
+[your-program] $ echo 'Hello James' 1> /tmp/owl/bee.md
+[your-program] $ cat /tmp/owl/bee.md
+[your-program] Hello James
+[tester::#JV1] ✓ Received redirected file content
+[your-program] $ cat /tmp/pig/orange nonexistent 1> /tmp/owl/pig.md
+[your-program] cat: nonexistent: No such file or directory
+[tester::#JV1] ✓ Received error message
+[your-program] $ cat /tmp/owl/pig.md
+[your-program] orange
+[tester::#JV1] ✓ Received redirected file content
+[your-program] $ 
+[tester::#JV1] Test passed.
+
+Test passed. Congrats!
+
+Submit your changes to move to the next step: `codecrafters submit`

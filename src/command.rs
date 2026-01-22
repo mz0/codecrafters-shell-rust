@@ -6,7 +6,7 @@ use std::{
     path::PathBuf,
     process, str,
 };
-
+use is_executable::IsExecutable;
 use anyhow::Result;
 use strum::{Display, EnumIter, EnumString};
 
@@ -183,7 +183,7 @@ impl Command {
         env::var("PATH").ok().and_then(|path_str| {
             env::split_paths(&path_str).find_map(|path| {
                 let full_path = path.join(cmd);
-                full_path.is_file().then_some(full_path)
+                (full_path.is_file() && full_path.is_executable()).then_some(full_path)
             })
         })
     }
