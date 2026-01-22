@@ -2,6 +2,17 @@
 This is a w.i.p. Rust solutions to the
 ["Build Your Own Shell" Challenge](https://app.codecrafters.io/courses/shell/overview).
 
+## `codecrafters` CLI
+
+[Install `codecrafters` CLI](https://docs.codecrafters.io/cli/installation#how-do-i-install-the-cli)
+and use it to check your progress:
+```
+# ...edit files, then
+$ git add src/ Cargo.toml Cargo.lock
+$ codecrafters test
+# ...TODO output sample...#
+```
+
 **Note**: If you're viewing this repo on GitHub, head over to
 [codecrafters.io](https://codecrafters.io) to try the challenge.
 
