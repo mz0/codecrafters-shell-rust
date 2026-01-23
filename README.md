@@ -1,5 +1,5 @@
 
-This is a w.i.p. Rust solutions to the
+This is a Rust solutions to the
 ["Build Your Own Shell" Challenge](https://app.codecrafters.io/courses/shell/overview).
 
 ## `codecrafters` CLI
