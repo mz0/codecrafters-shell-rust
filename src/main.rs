@@ -59,6 +59,9 @@ fn main() {
                     Command::PipeCommand(commands) => {
                         pipeline::run_pipeline(&commands);
                     },
+                    c @ Command::RedirectCommand(_, _, _) => {
+                        pipeline::run_pipeline(&vec![c]);
+                    },
                     Command::InvalidCommand(err) => {
                         eprintln!("Error: {}", err);
                     }

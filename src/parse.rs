@@ -1,7 +1,18 @@
 #[derive(Debug, PartialEq)]
+pub enum RedirectKind {
+    Stdout,
+    Stderr,
+    Both,
+    StdoutAppend,
+    StderrAppend,
+    BothAppend,
+}
+
+#[derive(Debug, PartialEq)]
 pub enum Command {
     SimpleCommand(String, Vec<String>),
     PipeCommand(Vec<Command>),
+    RedirectCommand(Box<Command>, String, RedirectKind),
     InvalidCommand(String),
 }
 
@@ -47,10 +58,56 @@ fn parse_simple(s: &str) -> Command {
         return Command::InvalidCommand("Empty command".to_string());
     }
 
+    let mut args = Vec::new();
+    let mut redirects = Vec::new();
     let mut tokens_iter = tokens.into_iter();
-    let cmd = tokens_iter.next().unwrap();
-    let args = tokens_iter.collect();
-    Command::SimpleCommand(cmd, args)
+
+    while let Some(token) = tokens_iter.next() {
+        match token.as_str() {
+            ">" | "1>" => {
+                if let Some(path) = tokens_iter.next() {
+                    redirects.push((path, RedirectKind::Stdout));
+                } else {
+                    return Command::InvalidCommand("Missing path for redirect".to_string());
+                }
+            }
+            ">>" | "1>>" => {
+                if let Some(path) = tokens_iter.next() {
+                    redirects.push((path, RedirectKind::StdoutAppend));
+                } else {
+                    return Command::InvalidCommand("Missing path for redirect".to_string());
+                }
+            }
+            "2>" => {
+                if let Some(path) = tokens_iter.next() {
+                    redirects.push((path, RedirectKind::Stderr));
+                } else {
+                    return Command::InvalidCommand("Missing path for redirect".to_string());
+                }
+            }
+            "2>>" => {
+                if let Some(path) = tokens_iter.next() {
+                    redirects.push((path, RedirectKind::StderrAppend));
+                } else {
+                    return Command::InvalidCommand("Missing path for redirect".to_string());
+                }
+            }
+            _ => args.push(token),
+        }
+    }
+
+    if args.is_empty() {
+        return Command::InvalidCommand("Empty command".to_string());
+    }
+
+    let cmd = args.remove(0);
+    let mut command = Command::SimpleCommand(cmd, args);
+
+    for (path, kind) in redirects {
+        command = Command::RedirectCommand(Box::new(command), path, kind);
+    }
+
+    command
 }
 
 fn split_by_pipe(s: &str) -> Result<Vec<String>, String> {
@@ -349,5 +406,89 @@ mod tests {
             "/tmp/ant/two slashes \\92\\".to_string(),
         ]);
         assert_eq!(parse(input), expect);
+    }
+
+    #[test]
+    fn test_redirect_stdout() {
+        let input = "ls -la > output.txt";
+        let expected = Command::RedirectCommand(
+            Box::new(Command::SimpleCommand(
+                "ls".to_string(),
+                vec!["-la".to_string()],
+            )),
+            "output.txt".to_string(),
+            RedirectKind::Stdout,
+        );
+        assert_eq!(parse(input), expected);
+    }
+
+    #[test]
+    fn test_redirect_stderr() {
+        let input = "ls -la 2> error.log";
+        let expected = Command::RedirectCommand(
+            Box::new(Command::SimpleCommand(
+                "ls".to_string(),
+                vec!["-la".to_string()],
+            )),
+            "error.log".to_string(),
+            RedirectKind::Stderr,
+        );
+        assert_eq!(parse(input), expected);
+    }
+
+    #[test]
+    fn test_redirect_explicit_stdout() {
+        let input = "ls -la 1> output.txt";
+        let expected = Command::RedirectCommand(
+            Box::new(Command::SimpleCommand(
+                "ls".to_string(),
+                vec!["-la".to_string()],
+            )),
+            "output.txt".to_string(),
+            RedirectKind::Stdout,
+        );
+        assert_eq!(parse(input), expected);
+    }
+
+    #[test]
+    fn test_redirect_append_stdout() {
+        let input = "ls -la >> output.txt";
+        let expected = Command::RedirectCommand(
+            Box::new(Command::SimpleCommand(
+                "ls".to_string(),
+                vec!["-la".to_string()],
+            )),
+            "output.txt".to_string(),
+            RedirectKind::StdoutAppend,
+        );
+        assert_eq!(parse(input), expected);
+    }
+
+    #[test]
+    fn test_redirect_explicit_append_stdout() {
+        let input = "ls -la 1>> output.txt";
+        let expected = Command::RedirectCommand(
+            Box::new(Command::SimpleCommand(
+                "ls".to_string(),
+                vec!["-la".to_string()],
+            )),
+            "output.txt".to_string(),
+            RedirectKind::StdoutAppend,
+        );
+        assert_eq!(parse(input), expected);
+    }
+
+    #[test]
+    fn test_redirect_append_stderr() {
+        let input = "ls -la 2>> error.log";
+        let expected = Command::RedirectCommand(
+            Box::new(Command::SimpleCommand(
+                "ls".to_string(),
+                vec!["-la".to_string()],
+            )),
+            "error.log".to_string(),
+            RedirectKind::StderrAppend,
+        );
+        assert_eq!(parse(input), expected);
     }
 }
